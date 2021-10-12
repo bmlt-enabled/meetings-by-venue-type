@@ -251,9 +251,9 @@ func contains(s []string, str string) bool {
 }
 
 func pretty() {
-	fmt.Printf("\n")
+	fmt.Printf("\n\n")
 	fmt.Printf(LineColor, strings.Repeat("-=", 20))
-	fmt.Printf("\n")
+	fmt.Printf("\n\n")
 }
 
 func getUrl(url string) []byte {
