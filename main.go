@@ -117,7 +117,7 @@ func populate(total Totals) *Totals {
 	rcount := 1
 	regions := make([]map[string]string, 0)
 	for _, element := range regionSlice {
-		region := make(map[string]string)
+		var region map[string]string
 		if element["type"] == "RS" {
 			fmt.Printf("  ")
 			fmt.Printf(CountColor, rcount)
@@ -161,7 +161,7 @@ func populate(total Totals) *Totals {
 	scount := 1
 	serviceBodies := make([]map[string]string, 0)
 	for _, element := range regionSlice {
-		serviceBody := make(map[string]string)
+		var serviceBody map[string]string
 		if element["parent_id"] == regionServiceBodySelectedId || element["id"] == regionServiceBodySelectedId {
 			fmt.Printf("  ")
 			fmt.Printf(CountColor, scount)
@@ -251,9 +251,9 @@ func contains(s []string, str string) bool {
 }
 
 func pretty() {
-	fmt.Println("\n")
+	fmt.Printf("\n")
 	fmt.Printf(LineColor, strings.Repeat("-=", 20))
-	fmt.Println("\n")
+	fmt.Printf("\n")
 }
 
 func getUrl(url string) []byte {
