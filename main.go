@@ -22,7 +22,33 @@ const (
 	LineColor   = "\033[1;34m%s\u001B[0m"
 )
 
+type Totals struct {
+	Virtual       int
+	InPerson      int
+	Hybrid        int
+	TempVirtual   int
+	TotalMeetings int
+}
+
 func main() {
+	t := populate(Totals{})
+	t.PrintMethod()
+}
+
+func (totals Totals) PrintMethod() {
+	fmt.Printf("\033[1;36mIn-person:\u001B[0m  \033[1;32m%d", totals.InPerson)
+	fmt.Println("\u001B[0m")
+	fmt.Printf("\033[1;36mHybrid:\u001B[0m  \033[1;32m%d", totals.Hybrid)
+	fmt.Println("\u001B[0m")
+	fmt.Printf("\033[1;36mVirtual:\u001B[0m  \033[1;32m%d", totals.Virtual)
+	fmt.Println("\u001B[0m")
+	fmt.Printf("\033[1;37mTotal Meetings:\u001B[0m  \033[1;32m%d", totals.TotalMeetings)
+	fmt.Println("\n\u001B[0m")
+	pretty()
+	fmt.Println("\n")
+}
+
+func populate(total Totals) *Totals {
 	fmt.Printf(InfoColor, "\nGet Meetings By Venue-Type\n")
 	fmt.Printf(NoticeColor, "\nRoot Servers:")
 	fmt.Println("")
@@ -49,14 +75,14 @@ func main() {
 	rootInput, err := reader.ReadString('\n')
 	if err != nil {
 		fmt.Println("An error occurred while reading input. Please try again", err)
-		return
+		log.Fatal(err)
 	}
 	rootInput = strings.TrimSuffix(rootInput, "\n")
 
 	selectionRange, _ := strconv.ParseInt(rootInput, 10, 64)
 	if selectionRange > int64(len(tomatoSlice)) {
 		fmt.Printf(ErrorColor, "\nError: Selection must match one of the choices.")
-		return
+		os.Exit(0)
 	}
 
 	tomatoSelectionIndex, _ := strconv.ParseInt(rootInput, 10, 64)
@@ -95,14 +121,14 @@ func main() {
 	regionInput, err := regionReader.ReadString('\n')
 	if err != nil {
 		fmt.Println("An error occurred while reading input. Please try again", err)
-		return
+		os.Exit(0)
 	}
 	regionInput = strings.TrimSuffix(regionInput, "\n")
 
 	regionSelectionRange, _ := strconv.ParseInt(regionInput, 10, 64)
-	if regionSelectionRange > int64(len(regionSlice)) {
+	if regionSelectionRange > int64(len(regions)) {
 		fmt.Printf(ErrorColor, "\nError: Selection must match one of the choices.")
-		return
+		os.Exit(0)
 	}
 
 	regionSelectionIndex, _ := strconv.ParseInt(regionInput, 10, 64)
@@ -128,18 +154,18 @@ func main() {
 	serviceBodyInput, err := serviceBodyReader.ReadString('\n')
 	if err != nil {
 		fmt.Println("An error occurred while reading input. Please try again", err)
-		return
+		os.Exit(0)
 	}
 	serviceBodyInput = strings.TrimSuffix(serviceBodyInput, "\n")
 
 	serviceBodySelectionRange, _ := strconv.ParseInt(serviceBodyInput, 10, 64)
 	if serviceBodySelectionRange > int64(len(serviceBodies)) {
 		fmt.Printf(ErrorColor, "\nError: Selection must match one of the choices.")
-		return
+		os.Exit(0)
 	}
 
 	serviceBodySelectionIndex, _ := strconv.ParseInt(serviceBodyInput, 10, 64)
-	serviceBodySelectedId := regions[serviceBodySelectionIndex-1]["id"]
+	serviceBodySelectedId := serviceBodies[serviceBodySelectionIndex-1]["id"]
 	fmt.Printf("\n\033[1;35mYou selected:\033[0m \033[1;31m%s [%s (%s)]", serviceBodyInput, serviceBodies[serviceBodySelectionIndex-1]["name"], serviceBodySelectedId)
 	fmt.Printf("\033[0m\n")
 
@@ -174,16 +200,15 @@ func main() {
 		totalMeetings += 1
 	}
 
-	fmt.Printf("\033[1;36mIn-person:\u001B[0m  \033[1;32m%d", inPerson)
-	fmt.Println("\u001B[0m")
-	fmt.Printf("\033[1;36mHybrid:\u001B[0m  \033[1;32m%d", hybrid)
-	fmt.Println("\u001B[0m")
-	fmt.Printf("\033[1;36mVirtual:\u001B[0m  \033[1;32m%d", virtual)
-	fmt.Println("\u001B[0m")
-	fmt.Printf("\033[1;37mTotal Meetings:\u001B[0m  \033[1;32m%d", totalMeetings)
-	fmt.Println("\n\u001B[0m")
-	pretty()
-	fmt.Println("\n")
+	total = Totals{
+		Virtual:       virtual,
+		InPerson:      inPerson,
+		Hybrid:        hybrid,
+		TempVirtual:   tempVirtual,
+		TotalMeetings: totalMeetings,
+	}
+
+	return &total
 }
 
 func contains(s []string, str string) bool {
