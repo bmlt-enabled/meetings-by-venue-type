@@ -15,11 +15,14 @@ import (
 )
 
 const (
-	InfoColor   = "\033[1;38m%s\033[0m"
-	NoticeColor = "\033[1;35m%s\033[0m"
-	PromptColor = "\033[1;36m%s\u001B[0m"
-	ErrorColor  = "\033[1;31m%s\u001B[0m"
-	LineColor   = "\033[1;34m%s\u001B[0m"
+	ErrorColor    = "\033[1;31m%s\033[0m"
+	TotalColor    = "\033[1;32m%d\033[0m"
+	LineColor     = "\033[1;34m%s\033[0m"
+	NoticeColor   = "\033[1;35m%s\033[0m"
+	PromptColor   = "\033[1;36m%s\033[0m"
+	InfoColor     = "\033[1;38m%s\033[0m"
+	ServicesColor = "\033[1;93m%s\033[0m"
+	CountColor    = "\033[1;93m%d\033[0m"
 )
 
 type Totals struct {
@@ -36,16 +39,15 @@ func main() {
 }
 
 func (totals Totals) PrintMethod() {
-	fmt.Printf("\033[1;36mIn-person:\u001B[0m  \033[1;32m%d", totals.InPerson)
-	fmt.Println("\u001B[0m")
-	fmt.Printf("\033[1;36mHybrid:\u001B[0m  \033[1;32m%d", totals.Hybrid)
-	fmt.Println("\u001B[0m")
-	fmt.Printf("\033[1;36mVirtual:\u001B[0m  \033[1;32m%d", totals.Virtual)
-	fmt.Println("\u001B[0m")
-	fmt.Printf("\033[1;37mTotal Meetings:\u001B[0m  \033[1;32m%d", totals.TotalMeetings)
-	fmt.Println("\n\u001B[0m")
+	fmt.Printf(PromptColor, "In-person: ")
+	fmt.Printf(TotalColor, totals.InPerson)
+	fmt.Printf(PromptColor, "\nHybrid: ")
+	fmt.Printf(TotalColor, totals.Hybrid)
+	fmt.Printf(PromptColor, "\nVirtual: ")
+	fmt.Printf(TotalColor, totals.Virtual)
+	fmt.Printf(InfoColor, "\nTotal Meetings: ")
+	fmt.Printf(TotalColor, totals.TotalMeetings)
 	pretty()
-	fmt.Println("\n")
 }
 
 func populate(total Totals) *Totals {
@@ -66,7 +68,11 @@ func populate(total Totals) *Totals {
 
 	count := 1
 	for _, element := range tomatoSlice {
-		fmt.Println("\033[1;93m ", count, element["name"], "\u001B[0m")
+		fmt.Printf("  ")
+		fmt.Printf(CountColor, count)
+		fmt.Printf(" ")
+		fmt.Printf(ServicesColor, element["name"])
+		fmt.Printf("\n")
 		count += 1
 	}
 
@@ -86,8 +92,13 @@ func populate(total Totals) *Totals {
 	}
 
 	tomatoSelectionIndex, _ := strconv.ParseInt(rootInput, 10, 64)
-	fmt.Printf("\n\033[1;35mYou selected:\033[0m \033[1;31m%s [%s]", rootInput, tomatoSlice[tomatoSelectionIndex-1]["name"])
-	fmt.Printf("\033[0m")
+
+	fmt.Printf(NoticeColor, "\nYou selected: ")
+	fmt.Printf(ErrorColor, rootInput)
+	fmt.Printf(ErrorColor, " [")
+	fmt.Printf(ErrorColor, tomatoSlice[tomatoSelectionIndex-1]["name"])
+	fmt.Printf(ErrorColor, "]")
+
 	rootUrl := tomatoSlice[tomatoSelectionIndex-1]["rootURL"]
 
 	serviceBodiesData := getUrl(fmt.Sprintf("%sclient_interface/json/?switcher=GetServiceBodies", rootUrl))
@@ -108,7 +119,11 @@ func populate(total Totals) *Totals {
 	for _, element := range regionSlice {
 		region := make(map[string]string)
 		if element["type"] == "RS" {
-			fmt.Println("\033[1;93m ", rcount, element["name"], "\u001B[0m")
+			fmt.Printf("  ")
+			fmt.Printf(CountColor, rcount)
+			fmt.Printf(" ")
+			fmt.Printf(ServicesColor, element["name"])
+			fmt.Printf("\n")
 			region = element
 			regions = append(regions, region)
 			rcount += 1
@@ -133,8 +148,14 @@ func populate(total Totals) *Totals {
 
 	regionSelectionIndex, _ := strconv.ParseInt(regionInput, 10, 64)
 	regionServiceBodySelectedId := regions[regionSelectionIndex-1]["id"]
-	fmt.Printf("\n\033[1;35mYou selected:\033[0m \033[1;31m%s [%s (%s)]", regionInput, regions[regionSelectionIndex-1]["name"], regionServiceBodySelectedId)
-	fmt.Printf("\033[0m")
+	fmt.Printf(NoticeColor, "\nYou selected: ")
+	fmt.Printf(ErrorColor, regionInput)
+	fmt.Printf(ErrorColor, " [")
+	fmt.Printf(ErrorColor, regions[regionSelectionIndex-1]["name"])
+	fmt.Printf(ErrorColor, " (")
+	fmt.Printf(ErrorColor, regionServiceBodySelectedId)
+	fmt.Printf(ErrorColor, ")")
+	fmt.Printf(ErrorColor, "]")
 	fmt.Printf(NoticeColor, "\n\nService Bodies: \n")
 
 	scount := 1
@@ -142,7 +163,11 @@ func populate(total Totals) *Totals {
 	for _, element := range regionSlice {
 		serviceBody := make(map[string]string)
 		if element["parent_id"] == regionServiceBodySelectedId || element["id"] == regionServiceBodySelectedId {
-			fmt.Println("\033[1;93m ", scount, element["name"], "\u001B[0m")
+			fmt.Printf("  ")
+			fmt.Printf(CountColor, scount)
+			fmt.Printf(" ")
+			fmt.Printf(ServicesColor, element["name"])
+			fmt.Printf("\n")
 			serviceBody = element
 			serviceBodies = append(serviceBodies, serviceBody)
 			scount += 1
@@ -166,12 +191,16 @@ func populate(total Totals) *Totals {
 
 	serviceBodySelectionIndex, _ := strconv.ParseInt(serviceBodyInput, 10, 64)
 	serviceBodySelectedId := serviceBodies[serviceBodySelectionIndex-1]["id"]
-	fmt.Printf("\n\033[1;35mYou selected:\033[0m \033[1;31m%s [%s (%s)]", serviceBodyInput, serviceBodies[serviceBodySelectionIndex-1]["name"], serviceBodySelectedId)
-	fmt.Printf("\033[0m\n")
-
-	fmt.Printf(InfoColor, "\nTotal Meetings By Venue Type\n\n")
+	fmt.Printf(NoticeColor, "\nYou selected: ")
+	fmt.Printf(ErrorColor, serviceBodyInput)
+	fmt.Printf(ErrorColor, " [")
+	fmt.Printf(ErrorColor, serviceBodies[serviceBodySelectionIndex-1]["name"])
+	fmt.Printf(ErrorColor, " (")
+	fmt.Printf(ErrorColor, serviceBodySelectedId)
+	fmt.Printf(ErrorColor, ")")
+	fmt.Printf(ErrorColor, "]")
+	fmt.Printf(InfoColor, "\n\nTotal Meetings By Venue Type")
 	pretty()
-	fmt.Println("\n")
 
 	meetingsData := getUrl(fmt.Sprintf("%sclient_interface/json/?switcher=GetSearchResults&services=%s&recursive=1&data_field_key=formats", rootUrl, serviceBodySelectedId))
 	var meetingSlice []map[string]string
@@ -222,7 +251,9 @@ func contains(s []string, str string) bool {
 }
 
 func pretty() {
+	fmt.Println("\n")
 	fmt.Printf(LineColor, strings.Repeat("-=", 20))
+	fmt.Println("\n")
 }
 
 func getUrl(url string) []byte {
