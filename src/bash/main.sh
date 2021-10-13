@@ -94,7 +94,9 @@ while read -r i; do
 			((VIRTUAL++))
 		elif [[ ! " ${a[*]} " =~ "VM" ]] && [[ ! " ${a[*]} " =~ "TC" ]] && [[ " ${a[*]} " =~ "HY" ]]; then
 			((HYBRID++))
-		fi
+		elif [[ " ${a[*]} " =~ "VM" ]] && [[ ! " ${a[*]} " =~ "TC" ]] && [[ " ${a[*]} " =~ "HY" ]]; then
+      ((HYBRID++))
+    fi
 	done
 done < <(echo "$MEETINGS")
 
