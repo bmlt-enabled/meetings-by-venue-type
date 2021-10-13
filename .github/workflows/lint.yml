@@ -5,7 +5,7 @@ on:
     branches: [ 'main' ]
 
 jobs:
-  lint:
+  lint-go:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -13,9 +13,16 @@ jobs:
         with:
           stable: 'false'
           go-version: '1.17.1'
-
       - name: Lint
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.42.1
-
-          golangci-lint run *.go
+          golangci-lint run src/go/main.go
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './src/bash'
