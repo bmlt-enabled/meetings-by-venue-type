@@ -32,7 +32,7 @@ echo colors("\nYou selected: ", "35") . colors($root_server_selected . " [" . $r
 
 $service_bodies = json_decode(get($root_server_selected_url . "client_interface/json/?switcher=GetServiceBodies"), true);
 
-foreach ($service_bodies as  $key => $value){
+foreach ($service_bodies as $key => $value) {
     if ($value["type"] == "RS") {
         $regions[$key] = $value;
     }
@@ -55,7 +55,7 @@ $region_service_body_selected = rtrim(fgets(STDIN));
 $region_service_body_selected_id = $regions[$region_service_body_selected-1]["id"];
 echo colors("\nYou selected: ", "35") . colors($region_service_body_selected . " [" . $regions[$region_service_body_selected-1]["name"] . " (" .$region_service_body_selected_id. ")]\n", "31");
 
-foreach ($service_bodies as  $key => $value){
+foreach ($service_bodies as $key => $value) {
     if ($value["parent_id"] == $region_service_body_selected_id || $value["id"] == $region_service_body_selected_id) {
         $region_service_bodies[$key] = $value;
     }
@@ -82,13 +82,14 @@ $meetings = json_decode(get($root_server_selected_url . "client_interface/json/?
 
 foreach ($meetings as $meeting) {
     $formats = explode(",", $meeting['formats']);
-    if (  !in_array("VM", $formats) && !in_array("TC", $formats) && !in_array("HY", $formats)  ) {
+    if (!in_array("VM", $formats) && !in_array("TC", $formats) && !in_array("HY", $formats)) {
         $inperson++;
-    } else if (  in_array("VM", $formats) && !in_array("TC", $formats) && !in_array("HY", $formats)  ) {
+    } elseif (in_array("VM", $formats) && !in_array("TC", $formats) && !in_array("HY", $formats)) {
         $virtual++;
-    } else if (  in_array("VM", $formats) && in_array("TC", $formats) && !in_array("HY", $formats)  ) {
-        $tempvirtual++;$virtual++;
-    } else if (  !in_array("VM", $formats) && !in_array("TC", $formats) && in_array("HY", $formats)  ) {
+    } elseif (in_array("VM", $formats) && in_array("TC", $formats) && !in_array("HY", $formats)) {
+        $tempvirtual++;
+        $virtual++;
+    } elseif (!in_array("VM", $formats) && !in_array("TC", $formats) && in_array("HY", $formats)) {
         $hybrid++;
     }
     $total_meetings++;
