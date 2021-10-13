@@ -91,6 +91,8 @@ foreach ($meetings as $meeting) {
         $virtual++;
     } elseif (!in_array("VM", $formats) && !in_array("TC", $formats) && in_array("HY", $formats)) {
         $hybrid++;
+    } elseif (in_array("VM", $formats) && !in_array("TC", $formats) && in_array("HY", $formats)) {
+        $hybrid++;
     }
     $total_meetings++;
 }
