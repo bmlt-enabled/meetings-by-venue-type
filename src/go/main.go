@@ -226,8 +226,8 @@ func populate(total Totals) *Totals {
 		} else if !contains(formats, "VM") && !contains(formats, "TC") && contains(formats, "HY") {
 			hybrid += 1
 		} else if contains(formats, "VM") && !contains(formats, "TC") && contains(formats, "HY") {
-            hybrid += 1
-        }
+			hybrid += 1
+		}
 		totalMeetings += 1
 	}
 
