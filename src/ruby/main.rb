@@ -1,9 +1,12 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 # main.rb
 require 'uri'
 require 'net/http'
 require 'json'
 
+# Used for console colors
 class String
   def red
     "\e[31m\e[1m#{self}\e[0m"
@@ -37,23 +40,30 @@ end
 def get_url(url)
   useragent = 'Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0) +bmltruby'
   get = Net::HTTP.get_response(URI(url), { 'User-Agent' => useragent })
-  b = get.body if get.is_a?(Net::HTTPSuccess)
-  return JSON.parse(get.body)
+  JSON.parse(get.body)
 end
 
-def pretty()
+def pretty
   print "\n"
-  print "#{"-=".blue}" * 20
+  print '-='.blue.to_s * 20
   print "\n\n"
 end
 
-def populate()
+# rubocop:disable Metrics/MethodLength
+# rubocop:disable Metrics/PerceivedComplexity
+# rubocop:disable  Metrics/AbcSize
+# rubocop:disable Metrics/CyclomaticComplexity
+def populate
+  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/PerceivedComplexity
+  # rubocop:enable  Metrics/AbcSize
+  # rubocop:enable Metrics/CyclomaticComplexity
   puts "\nGet Meetings By Venue-Type".white
   puts "\nRoot Servers:".magenta
 
   root_servers_data = get_url(
     'https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json'
-  ).sort_by { |k| k["name"] }
+  ).sort_by { |k| k['name'] }
 
   rsc = 1
   root_servers_data.each do |i|
@@ -72,21 +82,21 @@ def populate()
   rs_name = root_servers_data[rs_input.to_i - 1]['name']
   rs_url = root_servers_data[rs_input.to_i - 1]['rootURL']
 
-  puts "\n#{"You selected: ".magenta}\033[1;31m#{rs_input} [#{rs_name}]\e[0m"
+  puts "\n#{'You selected: '.magenta}\033[1;31m#{rs_input} [#{rs_name}]\e[0m"
   puts "\nRegions:".magenta
 
   service_body_data = get_url(
     "#{rs_url}client_interface/json/?switcher=GetServiceBodies"
-  ).sort_by { |k| k["name"] }
+  ).sort_by { |k| k['name'] }
 
   regions = []
   sbrc = 1
   service_body_data.each do |i|
-    if i['type'] == "RS"
-      puts "  #{sbrc} #{i['name']}".yellow
-      regions.push i
-      sbrc += 1
-    end
+    next unless i['type'] == 'RS'
+
+    puts "  #{sbrc} #{i['name']}".yellow
+    regions.push i
+    sbrc += 1
   end
 
   print "\nSelect a region: ".magenta
@@ -100,18 +110,18 @@ def populate()
   rg_name = regions[rg_input.to_i - 1]['name']
   rg_id = regions[rg_input.to_i - 1]['id']
 
-  #noinspection RubyInterpreter
-  puts "\n#{"You selected: ".magenta}\033[1;31m#{rg_input} [#{rg_name} (#{rg_id})]\e[0m"
+  # noinspection RubyInterpreter
+  puts "\n#{'You selected: '.magenta}\033[1;31m#{rg_input} [#{rg_name} (#{rg_id})]\e[0m"
   puts "\nService Bodies:".magenta
 
   service_bodies = []
   sbc = 1
   service_body_data.each do |i|
-    if i['id'] === rg_id || i['parent_id'] === rg_id
-      puts "  #{sbc} #{i['name']}".yellow
-      service_bodies.push i
-      sbc += 1
-    end
+    next unless i['id'] == rg_id || i['parent_id'] == rg_id
+
+    puts "  #{sbc} #{i['name']}".yellow
+    service_bodies.push i
+    sbc += 1
   end
 
   print "\nSelect a Service body: ".magenta
@@ -125,9 +135,11 @@ def populate()
   sb_name = service_bodies[sb_input.to_i - 1]['name']
   sb_id = service_bodies[sb_input.to_i - 1]['id']
 
-  puts "\n#{"You selected: ".magenta}\033[1;31m#{sb_input} [#{sb_name} (#{sb_id})]\e[0m"
+  puts "\n#{'You selected: '.magenta}\033[1;31m#{sb_input} [#{sb_name} (#{sb_id})]\e[0m"
 
-  meetings_data = get_url("#{rs_url}client_interface/json/?switcher=GetSearchResults&services=#{sb_id}&recursive=1&data_field_key=formats")
+  meetings_data = get_url(
+    "#{rs_url}client_interface/json/?switcher=GetSearchResults&services=#{sb_id}&recursive=1&data_field_key=formats"
+  )
 
   in_person = virtual = hybrid = temp_virtual = temp_closed = total = 0
   meetings_data.each do |i|
@@ -149,7 +161,7 @@ def populate()
     total += 1
   end
 
-  return {
+  {
     "in_person": in_person,
     "virtual": virtual,
     "temp_virtual": temp_virtual,
@@ -161,17 +173,17 @@ end
 
 def print_totals(totals)
   puts "\nTotal Meetings By Venue Type".white
-  pretty()
-  puts "#{"In-person: ".cyan}\e[32m\e[1m#{totals[:in_person]}\e[0m"
-  puts "#{"Hybrid: ".cyan}\e[32m\e[1m#{totals[:hybrid]}\e[0m"
-  puts "#{"Virtual: ".cyan}\e[32m\e[1m#{totals[:virtual]}\e[0m"
-  puts "#{"Total Meetings: ".white}\e[32m\e[1m#{totals[:total]}\e[0m"
-  pretty()
+  pretty
+  puts "#{'In-person: '.cyan}\e[32m\e[1m#{totals[:in_person]}\e[0m"
+  puts "#{'Hybrid: '.cyan}\e[32m\e[1m#{totals[:hybrid]}\e[0m"
+  puts "#{'Virtual: '.cyan}\e[32m\e[1m#{totals[:virtual]}\e[0m"
+  puts "#{'Total Meetings: '.white}\e[32m\e[1m#{totals[:total]}\e[0m"
+  pretty
 end
 
-def main()
-  t = populate()
+def main
+  t = populate
   print_totals(t)
 end
 
-main()
+main
