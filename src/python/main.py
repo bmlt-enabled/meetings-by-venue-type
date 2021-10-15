@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
+""" Get meeting types """
 import sys
 import json
 import urllib3
 
+# pylint: disable=line-too-long
+# pylint: disable=too-few-public-methods
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-statements
 
-class bcolors:
+class Bcolors:
+    """
+    Colors
+    """
     PRPL = '\033[1;35m'
     WHT = '\033[1;38m'
     YLW = '\033[1;93m'
@@ -19,25 +28,25 @@ def main():
     """
     Main
     """
-    t = populate()
-    printTotals(t)
+    totals = populate()
+    print_totals(totals)
 
 
-def printTotals(totals):
+def print_totals(totals):
     """
     Print Totals
     :param totals: dict of totals
     """
-    print(f"{bcolors.WHT}\nTotal Meetings By Venue Type{bcolors.EC}")
+    print(f"{Bcolors.WHT}\nTotal Meetings By Venue Type{Bcolors.EC}")
     pretty()
     print(
-        f"{bcolors.TAL}In-person: {bcolors.EC}{bcolors.GRN}{totals['inperson']}{bcolors.EC}")
+        f"{Bcolors.TAL}In-person: {Bcolors.EC}{Bcolors.GRN}{totals['inperson']}{Bcolors.EC}")
     print(
-        f"{bcolors.TAL}Hybrid: {bcolors.EC}{bcolors.GRN}{totals['hybrid']}{bcolors.EC}")
+        f"{Bcolors.TAL}Hybrid: {Bcolors.EC}{Bcolors.GRN}{totals['hybrid']}{Bcolors.EC}")
     print(
-        f"{bcolors.TAL}Virtual: {bcolors.EC}{bcolors.GRN}{totals['virtual']}{bcolors.EC}")
+        f"{Bcolors.TAL}Virtual: {Bcolors.EC}{Bcolors.GRN}{totals['virtual']}{Bcolors.EC}")
     print(
-        f"{bcolors.WHT}Total Meetings: {bcolors.EC}{bcolors.GRN}{totals['total']}{bcolors.EC}")
+        f"{Bcolors.WHT}Total Meetings: {Bcolors.EC}{Bcolors.GRN}{totals['total']}{Bcolors.EC}")
     pretty()
 
 
@@ -45,9 +54,9 @@ def pretty():
     """
     Pretty Print
     """
-    print(f"{bcolors.BLU}")
+    print(f"{Bcolors.BLU}")
     print('-=' * 20)
-    print(bcolors.EC)
+    print(Bcolors.EC)
 
 
 def get_url(url):
@@ -56,119 +65,124 @@ def get_url(url):
     :param url: string of url
     """
     http = urllib3.PoolManager()
-    r = http.request(
+    req = http.request(
         "GET",
         url,
         headers={
             'user-agent': 'User-Agent", "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0) +bmltpy'
         })
-    return json.loads(r.data.decode())
+    return json.loads(req.data.decode())
 
 
 def populate():
+    # pylint: disable=C0301
     """
     Populate
     :return: dict of totals
     """
-    print(f"{bcolors.WHT}\nGet Meetings By Venue-Type \n{bcolors.EC}")
-    print(f"{bcolors.PRPL}Root Servers: {bcolors.EC}")
+    print(f"{Bcolors.WHT}\nGet Meetings By Venue-Type \n{Bcolors.EC}")
+    print(f"{Bcolors.PRPL}Root Servers: {Bcolors.EC}")
 
-    rootServers = sorted(
+    root_servers = sorted(
         get_url("https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json"),
         key=lambda k: k['name'])
 
     rcount = 1
-    for server in rootServers:
-        print(f" {bcolors.YLW} {rcount} {server['name']} {bcolors.EC}")
+    for server in root_servers:
+        print(f" {Bcolors.YLW} {rcount} {server['name']} {Bcolors.EC}")
         rcount += 1
 
-    print(f"{bcolors.PRPL}")
-    rootServerInput = input("Select a root server: \033[0m")
+    print(f"{Bcolors.PRPL}")
+    root_server_input = input("Select a root server: \033[0m")
 
-    if int(rootServerInput) > len(rootServers):
-        print(f"\n{bcolors.RED}Error: Selection must match one of the choices.{bcolors.EC}")
+    if int(root_server_input) > len(root_servers):
+        print(
+            f"\n{Bcolors.RED}Error: Selection must match one of the choices.{Bcolors.EC}")
         sys.exit(0)
+    selected_root_server = root_servers[int(root_server_input) - 1]
+    selected_root_server_name = selected_root_server['name']
+    selected_root_server_url = selected_root_server['rootURL']
+    print(f"\n{Bcolors.PRPL}You selected: {Bcolors.EC}", end='')
 
-    selectedRootserver = rootServers[int(rootServerInput) - 1]
-    selectedRootserverName = selectedRootserver['name']
-    selectedRootserverUrl = selectedRootserver['rootURL']
-    print(f"\n{bcolors.PRPL}You selected: {bcolors.EC}", end='')
-    print(f"{bcolors.RED}{rootServerInput} [{selectedRootserverName}]{bcolors.EC}")
-    print(f"\n{bcolors.PRPL}Regions: {bcolors.EC}")
+    print(f"{Bcolors.RED}{root_server_input} [{selected_root_server_name}]{Bcolors.EC}")
+    print(f"\n{Bcolors.PRPL}Regions: {Bcolors.EC}")
 
-    serviceBodyUrl = "{}client_interface/json/?switcher=GetServiceBodies".format(
-        selectedRootserverUrl)
-    serviceBodiesData = sorted(
-        get_url(serviceBodyUrl),
+    service_body_url = f"{selected_root_server_url}client_interface/json/?switcher=GetServiceBodies"
+    service_bodies_data = sorted(
+        get_url(service_body_url),
         key=lambda k: k['name'])
 
     regions = {}
     scount = 1
-    for region in serviceBodiesData:
+    for region in service_bodies_data:
         if "RS" in region['type']:
-            print(f" {bcolors.YLW} {scount} {region['name']} {bcolors.EC}")
+            print(f" {Bcolors.YLW} {scount} {region['name']} {Bcolors.EC}")
             regions[scount] = region
             scount += 1
 
-    print(f"{bcolors.PRPL}")
-    regionsInput = input("Select a region: \033[0m")
+    print(f"{Bcolors.PRPL}")
+    regions_input = input("Select a region: \033[0m")
 
-    if int(regionsInput) > len(regions):
-        print(f"\n{bcolors.RED}Error: Selection must match one of the choices.{bcolors.EC}")
+    if int(regions_input) > len(regions):
+        print(
+            f"\n{Bcolors.RED}Error: Selection must match one of the choices.{Bcolors.EC}")
         sys.exit(0)
 
-    selectedRegionName = regions[int(regionsInput)]['name']
-    selectedRegionId = regions[int(regionsInput)]['id']
-    print(f"\n{bcolors.PRPL}You selected: {bcolors.EC}", end='')
-    print(f"{bcolors.RED}{regionsInput} [{selectedRegionName} ({selectedRegionId})]{bcolors.EC}")
-    print(f"\n{bcolors.PRPL}Service bodies: {bcolors.EC}")
+    selected_region_name = regions[int(regions_input)]['name']
+    selected_region_id = regions[int(regions_input)]['id']
+    print(f"\n{Bcolors.PRPL}You selected: {Bcolors.EC}", end='')
+    print(
+        f"{Bcolors.RED}{regions_input} [{selected_region_name} ({selected_region_id})]{Bcolors.EC}")
+    print(f"\n{Bcolors.PRPL}Service bodies: {Bcolors.EC}")
 
-    serviceBodies = {}
+    service_bodies = {}
     sbcount = 1
-    for serviceBody in serviceBodiesData:
-        if selectedRegionId in serviceBody['parent_id'] or selectedRegionId in serviceBody['id']:
-            print(f" {bcolors.YLW} {sbcount} {serviceBody['name']} {bcolors.EC}")
-            serviceBodies[sbcount] = serviceBody
+    for service_body in service_bodies_data:
+        if selected_region_id in service_body['parent_id'] or selected_region_id in service_body['id']:
+            print(
+                f" {Bcolors.YLW} {sbcount} {service_body['name']} {Bcolors.EC}")
+            service_bodies[sbcount] = service_body
             sbcount += 1
 
-    print(f"{bcolors.PRPL}")
-    serviceBodyInput = input("Select a service body: \033[0m")
+    print(f"{Bcolors.PRPL}")
+    service_body_input = input("Select a service body: \033[0m")
 
-    if int(serviceBodyInput) > len(serviceBodies):
-        print(f"\n{bcolors.RED}Error: Selection must match one of the choices.{bcolors.EC}")
+    if int(service_body_input) > len(service_bodies):
+        print(
+            f"\n{Bcolors.RED}Error: Selection must match one of the choices.{Bcolors.EC}")
         sys.exit(0)
 
-    selectedServiceBodyId = serviceBodies[int(serviceBodyInput)]['id']
-    meetingsData = get_url(
-        "{}/client_interface/json/?switcher=GetSearchResults&services={}&recursive=1&data_field_key=formats".
-        format(selectedRootserverUrl, selectedServiceBodyId))
+    selected_service_body_id = service_bodies[int(service_body_input)]['id']
+    meetings_data = get_url(
+        f"{selected_root_server_url}/client_interface/json/?switcher=GetSearchResults&services={selected_service_body_id}&recursive=1&data_field_key=formats"
+        )
 
-    inPerson = hybrid = virtual = tempVirtual = tempClosed = total = 0
-    for meeting in meetingsData:
+    in_person = hybrid = virtual = temp_virtual = temp_closed = total = 0
+    for meeting in meetings_data:
         formats = meeting['formats'].split(",")
         if "VM" not in formats and "TC" not in formats and "HY" not in formats:
-            inPerson += 1
+            in_person += 1
         elif "VM" in formats and "TC" not in formats and "HY" not in formats:
             virtual += 1
         elif "VM" in formats and "TC" in formats and "HY" not in formats:
             virtual += 1
-            tempVirtual += 1
+            temp_virtual += 1
         elif "VM" not in formats and "TC" not in formats and "HY" in formats:
             hybrid += 1
         elif "VM" in formats and "TC" not in formats and "HY" in formats:
             hybrid += 1
         elif "VM" not in formats and "TC" in formats and "HY" not in formats:
-            tempClosed += 1
+            temp_closed += 1
         else:
             print(formats)
         total += 1
 
     return {
-        'inperson': inPerson,
+        'inperson': in_person,
         'virtual': virtual,
-        'tempvirtual': tempVirtual,
+        'tempvirtual': temp_virtual,
         'hybrid': hybrid,
-        'tempclosed': tempClosed,
+        'tempclosed': temp_closed,
         'total': total
     }
 
