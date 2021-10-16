@@ -133,7 +133,7 @@ def populate():
     print(f"\n{Bcolors.PRPL}You selected: {Bcolors.EC}", end='')
     print(
         f"{Bcolors.RED}{regions_input} [{selected_region_name} ({selected_region_id})]{Bcolors.EC}")
-    print(f"\n{Bcolors.PRPL}Service bodies: {Bcolors.EC}")
+    print(f"\n{Bcolors.PRPL}Service Bodies: {Bcolors.EC}")
 
     service_bodies = {}
     sbcount = 1
@@ -151,6 +151,10 @@ def populate():
         print(
             f"\n{Bcolors.RED}Error: Selection must match one of the choices.{Bcolors.EC}")
         sys.exit(0)
+
+    print(f"\n{Bcolors.PRPL}You selected: {Bcolors.EC}", end='')
+    selected_service_body_server_name = service_bodies[int(service_body_input)]['name']
+    print(f"{Bcolors.RED}{service_body_input} [{selected_service_body_server_name}]{Bcolors.EC}")
 
     selected_service_body_id = service_bodies[int(service_body_input)]['id']
     meetings_data = get_url(

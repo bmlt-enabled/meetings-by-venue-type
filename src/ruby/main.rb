@@ -124,7 +124,7 @@ def populate
     sbc += 1
   end
 
-  print "\nSelect a Service body: ".magenta
+  print "\nSelect a service body: ".magenta
   sb_input = gets.chomp
 
   if sb_input.to_i > service_bodies.length
