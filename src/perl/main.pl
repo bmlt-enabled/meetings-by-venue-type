@@ -87,7 +87,7 @@ foreach my $ServiceBody (@ServiceBodiesSort) {
 }
 
 my @ServiceBodySort = sort { $a->{name} cmp $b->{name} } values %ServiceBodies;
-print BRIGHT_MAGENTA, "\nSelect a region: ", RESET;
+print BRIGHT_MAGENTA, "\nSelect a service body: ", RESET;
 my $ServiceBodyInput = <STDIN>;
 chomp $ServiceBodyInput;
 if ( $ServiceBodyInput > ( values %ServiceBodies ) ) {
@@ -150,7 +150,7 @@ print BRIGHT_CYAN,  "\nIn-person: ", RESET, BRIGHT_GREEN, "$InPerson",   RESET;
 print BRIGHT_CYAN,  "\nHybrid: ",    RESET, BRIGHT_GREEN, "$hybrid",     RESET;
 print BRIGHT_CYAN,  "\nVirtual: ",   RESET, BRIGHT_GREEN, "$virtual",    RESET;
 print BRIGHT_WHITE, "\nTotal Meetings: ", RESET, BRIGHT_GREEN, "$total", RESET;
-print BRIGHT_BLUE,  "\n\n",               "-=" x 20, "\n", RESET;
+print BRIGHT_BLUE,  "\n\n",               "-=" x 20, "\n\n", RESET;
 
 sub get_url {
     my $url    = $_[0];

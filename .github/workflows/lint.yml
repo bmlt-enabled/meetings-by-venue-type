@@ -1,4 +1,4 @@
-name: Lint Go Code
+name: Lint
 
 on:
   pull_request:
@@ -17,8 +17,7 @@ jobs:
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.42.1
           golangci-lint run src/go/main.go
-  shellcheck:
-    name: Shellcheck
+  lint-shell:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -26,3 +25,53 @@ jobs:
         uses: ludeeus/action-shellcheck@master
         with:
           scandir: './src/bash'
+  lint-ruby:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: RuboCop Linter
+        uses: andrewmcodes/rubocop-linter-action@v3.3.0
+        with:
+          action_config_path: ".github/config/rubocop_linter_action.yml"
+          exit_on_failure: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  lint-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Analysing the code with pylint
+        run: |
+          python -m pylint --fail-under=10 `find -regextype egrep -regex '(.*.py)$'` |
+          tee pylint.txt
+      - name: Upload pylint.txt as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: pylint report
+          path: pylint.txt
+  lint-perl:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Perl Critic
+        uses: Difegue/action-perlcritic@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --brutal ./src/perl/*.pl
+  lint-php:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Lint
+        run: |
+          curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
+          php phpcs.phar --warning-severity=5 --standard=PSR2 --extensions=php src/php/main.php

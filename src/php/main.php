@@ -1,5 +1,11 @@
 <?php
+/**
+ * @file
+ * Get meeting types by venue.
+ */
 
+// phpcs:disable Generic.Files.LineLength.TooLong
+// phpcs:disable PSR1.Files.SideEffects
 $root_server = "https://bmlt.sezf.org/main_server";
 $console_color = true;
 $tempvirtual = 0;
@@ -11,9 +17,14 @@ $region_service_bodies = [];
 $regions = [];
 
 $root_servers = json_decode(get("https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json"), true);
-usort($root_servers, function ($a, $b) {
-    return strnatcasecmp($a["name"], $b["name"]);
-});
+
+// phpcs:disable PSR2.Methods.FunctionCallSignature.MultipleArguments
+usort(
+    $root_servers, function ($a, $b) {
+        return strnatcasecmp($a["name"], $b["name"]);
+    }
+);
+// phpcs:enable PSR2.Methods.FunctionCallSignature.MultipleArguments
 
 echo colors("\nGet Meetings By Venue-Type \n", "38");
 echo colors("\nRoot Servers: \n", "35");
@@ -38,9 +49,13 @@ foreach ($service_bodies as $key => $value) {
     }
 }
 
-usort($regions, function ($a, $b) {
-    return strnatcasecmp($a["name"], $b["name"]);
-});
+// phpcs:disable PSR2.Methods.FunctionCallSignature.MultipleArguments
+usort(
+    $regions, function ($a, $b) {
+        return strnatcasecmp($a["name"], $b["name"]);
+    }
+);
+// phpcs:enable PSR2.Methods.FunctionCallSignature.MultipleArguments
 
 echo colors("\nRegions: \n", "35");
 
@@ -61,9 +76,13 @@ foreach ($service_bodies as $key => $value) {
     }
 }
 
-usort($region_service_bodies, function ($a, $b) {
-    return strnatcasecmp($a["name"], $b["name"]);
-});
+// phpcs:disable PSR2.Methods.FunctionCallSignature.MultipleArguments
+usort(
+    $region_service_bodies, function ($a, $b) {
+        return strnatcasecmp($a["name"], $b["name"]);
+    }
+);
+// phpcs:enable PSR2.Methods.FunctionCallSignature.MultipleArguments
 
 echo colors("\nService Bodies: \n", "35");
 
@@ -107,11 +126,17 @@ echo colors("Total Meetings: ", "37") . colors($total_meetings, "32") . "\n";
 echo colors(pretty(), "34");
 echo "\n";
 
+/**
+ * Implements pretty printing.
+ */
 function pretty()
 {
     return "\n" . str_repeat("-=", 20) . "\n";
 }
 
+/**
+ * Implements ansi colors.
+ */
 function colors($string, $color)
 {
     if ($GLOBALS['console_color']) {
@@ -121,9 +146,12 @@ function colors($string, $color)
     }
 }
 
+/**
+ * Implements get function.
+ */
 function get($url)
 {
-    #error_log($url);
+    // error_log($url);
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0) +bmltform');

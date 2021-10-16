@@ -51,6 +51,7 @@ SELECTED_REGION_NAME=$(echo "$SELECTED_REGION" | jq -r '.name')
 SELECTED_REGION_ID=$(echo "$SELECTED_REGION" | jq -r '.id')
 echo -en "${PRPL}\nYou selected: ${EC}"
 echo -en "${RED}$region_input [$SELECTED_REGION_NAME ($SELECTED_REGION_ID)]${EC}\n"
+echo -e "${PRPL}\nService Bodies: ${EC}"
 
 REGION_SERVICE_BODIES=$(echo "$SERVICE_BODIES" | jq -c --arg SELECTION "$SELECTED_REGION_ID" '.[] | select((.parent_id==$SELECTION) or (.id==$SELECTION))')
 
@@ -103,7 +104,7 @@ done < <(echo "$MEETINGS")
 TOTAL_NO_FORMATS=$((TOTAL - NOFORMAT))
 TOTAL_INPERSON=$((INPERSON + TOTAL_NO_FORMATS))
 
-echo -e "${WHT}\n\nTotal Meetings By Venue Type\n${EC}"
+echo -e "${WHT}\nTotal Meetings By Venue Type\n${EC}"
 echo -e "${BLU}-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n${EC}"
 echo -e "${TAL}In-person:${EC} ${GRN}$TOTAL_INPERSON${EC}"
 echo -e "${TAL}Hybrid:${EC} ${GRN}$HYBRID${EC}"
