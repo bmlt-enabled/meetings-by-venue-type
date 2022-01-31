@@ -58,10 +58,10 @@ fetch('https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerLi
                 let root_server_selected_url = rootServers[rootserverSelected-1]["rootURL"];
                 let root_server_selected_name = rootServers[rootserverSelected-1]["name"];
                 log(chalk.magentaBright('You Selected:'), chalk.redBright(rootserverSelected, '[' + root_server_selected_name + ']'))
+                log('')
                 return root_server_selected_url
             })
             .then(rootServerUrl => {
-                log('')
                 log(chalk.magentaBright('Regions:'))
                 fetch(rootServerUrl + "client_interface/json/?switcher=GetServiceBodies")
                     .then(res => res.text())
@@ -75,7 +75,7 @@ fetch('https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerLi
                         return serviceBodiesList
                     })
                     .then(serviceBodies => {
-                        log('')
+
                         let rl = 1
                         let regions = [];
                         for (const region of serviceBodies) {
@@ -86,6 +86,7 @@ fetch('https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerLi
                                 rl++
                             }
                         }
+                        log('')
                         ask(chalk.magentaBright('Select a region: '))
                             .then(regionSelected => {
                                 log('')
@@ -102,9 +103,62 @@ fetch('https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerLi
                             .then(regionId => {
                                 log('')
                                 log(chalk.magentaBright('Service Bodies:'))
-                                // console.log(serviceBodies)
 
-                                log(chalk.magentaBright(' ', regionId, '',rootServerUrl))
+                                // console.log(serviceBodies)
+                                let sb = 1
+                                let serviceBodyArr = [];
+                                for (const serviceBody of serviceBodies) {
+                                    if (serviceBody.parent_id === regionId || serviceBody.id === regionId) {
+                                        let serviceBodyName = serviceBody.name;
+                                        log(chalk.yellowBright(' ', sb, '', serviceBodyName))
+                                        serviceBodyArr.push(serviceBody);
+                                        sb++
+                                    }
+                                }
+                                log('')
+                                ask(chalk.magentaBright('Select a service body: '))
+                                    .then(serviceBodySelected => {
+                                        log('')
+                                        if (parseInt(serviceBodySelected) > serviceBodyArr.length) {
+                                            log(chalk.redBright("Error: Selection must match one of the choices."))
+                                            process.exit(0)
+                                        }
+                                        let service_body_selected_id = serviceBodyArr[serviceBodySelected-1]["id"];
+                                        let service_body_selected_name = serviceBodyArr[serviceBodySelected-1]["name"];
+                                        log(chalk.magentaBright('You Selected:'), chalk.redBright(serviceBodySelected,
+                                            '[' + service_body_selected_name + ' (' + service_body_selected_id + ')]'))
+                                        return service_body_selected_id
+                                    }).then(serviceBodyId => {
+                                        log('')
+                                        log(chalk.whiteBright('Total Meetings By Venue Type'), '\n')
+                                        fetch(rootServerUrl
+                                            + "client_interface/json/?switcher=GetSearchResults&services="
+                                            + serviceBodyId + "&recursive=1&data_field_key=formats")
+                                            .then(res => res.text())
+                                            .then((meetingsRaw) => {
+                                                let meetings = JSON.parse(meetingsRaw)
+                                                let ml = 0
+                                                let meetingArr = [];
+                                                for (const meeting of meetings) {
+                                                    // console.log(meeting)
+
+                                                    ml++
+                                                    // if (region.type.includes("RS")) {
+                                                    //     let regionName = region.name;
+                                                    //     log(chalk.yellowBright(' ', rl, '', regionName))
+                                                    //     regionArr.push(region);
+                                                    //     rl++
+                                                    // }
+                                                }
+                                            })
+                                        log(chalk.magentaBright(' ', serviceBodyId, '',rootServerUrl))
+                                    })
+
+
+
+                                // log(chalk.magentaBright(' ', regionId, '',rootServerUrl))
+
+
                                 // fetch(rootServerUrl
                                 //     + "client_interface/json/?switcher=GetSearchResults&services="
                                 // + regionId + "&recursive=1&data_field_key=formats")
