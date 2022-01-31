@@ -12,16 +12,6 @@ const rl = readline.createInterface({
 });
 rl.pause();
 
-function ask(question, cb = () => void 0) {
-    return new Promise((resolve) => {
-        rl.question(question, (...args) => {
-            rl.pause();
-            resolve(...args);
-            cb(...args);
-        });
-    });
-}
-
 log("");
 log(chalk.whiteBright("Get Meetings By Venue-Type"), "\n");
 log(chalk.magentaBright("Root Servers:"));
