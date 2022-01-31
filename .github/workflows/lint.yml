@@ -75,3 +75,18 @@ jobs:
         run: |
           curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
           php phpcs.phar --warning-severity=5 --standard=PSR2 --extensions=php src/php/main.php
+  lint-node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      - name: Lint
+        run: |
+          cd src/node
+          npm install
+          npx prettier index.js --check
