@@ -4,7 +4,7 @@
   "description": "meetings-by-venue-type",
   "main": "index.js",
   "scripts": {
-    "start": "node yolo.js"
+    "start": "node index.js"
   },
   "author": "pjaudiomv",
   "license": "MIT",
