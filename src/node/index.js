@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-import https from 'https';
-import chalk from "chalk";
+import https from "https";
 import readline from "readline";
 
 const log = console.log;
@@ -12,17 +11,26 @@ const rl = readline.createInterface({
 });
 rl.pause();
 
+let PRPL = "\u001b[1;35m";
+let WHT = "\u001b[1;38m";
+let YLW = "\u001b[1;93m";
+let RED = "\u001b[1;31m";
+let GRN = "\u001b[1;32m";
+let TAL = "\u001b[1;36m";
+let BLU = "\u001b[1;34m";
+let EC = "\u001b[0m";
+
 async function fetch(url) {
     return new Promise(async (resolve, reject) => {
         let body = [];
-        const req = https.request(url, res => {
-            res.on('data', chunk => body.push(chunk));
-            res.on('end', () => {
+        const req = https.request(url, (res) => {
+            res.on("data", (chunk) => body.push(chunk));
+            res.on("end", () => {
                 const data = JSON.parse(Buffer.concat(body).toString());
                 resolve(data);
             });
         });
-        req.on('error', e => {
+        req.on("error", (e) => {
             console.log(`ERROR httpsGet: ${e}`);
             reject(e);
         });
@@ -31,10 +39,12 @@ async function fetch(url) {
 }
 
 log("");
-log(chalk.whiteBright("Get Meetings By Venue-Type"), "\n");
-log(chalk.magentaBright("Root Servers:"));
+log(WHT + "Get Meetings By Venue-Type", EC, "\n");
+log(PRPL + "Root Servers:", EC);
 
-const tomatoServersData = await fetch('https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json');
+const tomatoServersData = await fetch(
+    "https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json"
+);
 
 let tomatoRootServers = tomatoServersData.sort(function (a, b) {
     a = a.name.toLowerCase();
@@ -46,35 +56,37 @@ let tomatoRootServers = tomatoServersData.sort(function (a, b) {
 let rs = 1;
 for (const rootServer of tomatoRootServers) {
     let rootServerName = rootServer.name;
-    log(chalk.yellowBright(" ", rs, "", rootServerName));
+    log(YLW + " " + rs, "", rootServerName, EC);
     rs++;
 }
 log("");
 
-const rootServerSelected = await new Promise(resolve => {
-    rl.question(chalk.magentaBright("Select a root server: "), resolve)
-})
+const rootServerSelected = await new Promise((resolve) => {
+    rl.question(PRPL + "Select a root server: " + EC, resolve);
+});
 
 log("");
 
 if (parseInt(rootServerSelected) > tomatoRootServers.length) {
-    log(
-        chalk.redBright("Error: Selection must match one of the choices.")
-    );
+    log(RED + "Error: Selection must match one of the choices.", EC);
     process.exit(0);
 }
-let root_server_selected_url = tomatoRootServers[rootServerSelected - 1]["rootURL"];
-let root_server_selected_name = tomatoRootServers[rootServerSelected - 1]["name"];
-log(chalk.magentaBright("You Selected:"),
-    chalk.redBright(
-        rootServerSelected,
-        "[" + root_server_selected_name + "]"
-    )
+let root_server_selected_url =
+    tomatoRootServers[rootServerSelected - 1]["rootURL"];
+let root_server_selected_name =
+    tomatoRootServers[rootServerSelected - 1]["name"];
+log(
+    PRPL + "You Selected:" + EC,
+    RED + rootServerSelected,
+    "[" + root_server_selected_name + "]",
+    EC
 );
 log("");
-log(chalk.magentaBright("Regions:"));
+log(PRPL + "Regions:", EC);
 
-const rootServersData = await fetch(root_server_selected_url + "client_interface/json/?switcher=GetServiceBodies");
+const rootServersData = await fetch(
+    root_server_selected_url + "client_interface/json/?switcher=GetServiceBodies"
+);
 
 let serviceBodies = rootServersData.sort(function (a, b) {
     a = a.name.toLowerCase();
@@ -88,36 +100,34 @@ let regions = [];
 for (const region of serviceBodies) {
     if (region.type.includes("RS")) {
         let regionName = region.name;
-        log(chalk.yellowBright(" ", sc, "", regionName));
+        log(YLW + " " + sc, "", regionName, EC);
         regions.push(region);
         sc++;
     }
 }
 
 log("");
-const regionSelected = await new Promise(resolve => {
-    rl.question(chalk.magentaBright("Select a region: "), resolve)
-})
+const regionSelected = await new Promise((resolve) => {
+    rl.question(PRPL + "Select a region: " + EC, resolve);
+});
 
 log("");
 
 if (parseInt(regionSelected) > regions.length) {
-    log(
-        chalk.redBright("Error: Selection must match one of the choices.")
-    );
+    log(RED + "Error: Selection must match one of the choices.", EC);
     process.exit(0);
 }
 let region_selected_id = regions[regionSelected - 1]["id"];
 let region_selected_name = regions[regionSelected - 1]["name"];
-log(chalk.magentaBright("You Selected:"),
-    chalk.redBright(
-        regionSelected,
-        "[" + region_selected_name + "]"
-    )
+log(
+    PRPL + "You Selected:" + EC,
+    RED + regionSelected,
+    "[" + region_selected_name + "]",
+    EC
 );
 
 log("");
-log(chalk.magentaBright("Service Bodies:"));
+log(PRPL + "Service Bodies:", EC);
 let sb = 1;
 let serviceBodyArr = [];
 for (const serviceBody of serviceBodies) {
@@ -126,7 +136,7 @@ for (const serviceBody of serviceBodies) {
         serviceBody.id === region_selected_id
     ) {
         let serviceBodyName = serviceBody.name;
-        log(chalk.yellowBright(" ", sb, "", serviceBodyName));
+        log(YLW + " " + sb, "", serviceBodyName, EC);
         serviceBodyArr.push(serviceBody);
         sb++;
     }
@@ -134,41 +144,35 @@ for (const serviceBody of serviceBodies) {
 
 log("");
 
-const serviceBodySelected = await new Promise(resolve => {
-    rl.question(chalk.magentaBright("Select a service body: "), resolve)
-})
+const serviceBodySelected = await new Promise((resolve) => {
+    rl.question(PRPL + "Select a service body: " + EC, resolve);
+});
 
 log("");
 
 if (parseInt(serviceBodySelected) > serviceBodyArr.length) {
-    log(
-        chalk.redBright("Error: Selection must match one of the choices.")
-    );
+    log(RED + "Error: Selection must match one of the choices.", EC);
     process.exit(0);
 }
 
-let service_body_selected_id =
-    serviceBodyArr[serviceBodySelected - 1]["id"];
+let service_body_selected_id = serviceBodyArr[serviceBodySelected - 1]["id"];
 let service_body_selected_name =
     serviceBodyArr[serviceBodySelected - 1]["name"];
 log(
-    chalk.magentaBright("You Selected:"),
-    chalk.redBright(
-        serviceBodySelected,
-        "[" +
-        service_body_selected_name +
-        " (" +
-        service_body_selected_id +
-        ")]"
-    )
+    PRPL + "You Selected:" + EC,
+    RED + serviceBodySelected,
+    "[" + service_body_selected_name + " (" + service_body_selected_id + ")]",
+    EC
 );
 
 log("");
 
-const meetingsData = await fetch(    root_server_selected_url +
+const meetingsData = await fetch(
+    root_server_selected_url +
     "client_interface/json/?switcher=GetSearchResults&services=" +
     service_body_selected_id +
-    "&recursive=1&data_field_key=formats");
+    "&recursive=1&data_field_key=formats"
+);
 
 let meetings = meetingsData;
 let allMeetings = 0;
@@ -213,38 +217,13 @@ for (const meeting of meetings) {
     }
     allMeetings++;
 }
-log(
-    chalk.whiteBright("Total Meetings By Venue Type"),
-    "\n"
-);
-log(
-    chalk.blueBright(
-        "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-    ),
-    "\n"
-);
-log(
-    chalk.cyanBright("In-person: ") +
-    chalk.greenBright(inPerson)
-);
-log(
-    chalk.cyanBright("Hybrid: ") +
-    chalk.greenBright(hybrid)
-);
-log(
-    chalk.cyanBright("Virtual: ") +
-    chalk.greenBright(virtual)
-);
-log(
-    chalk.whiteBright("Total Meetings: ") +
-    chalk.greenBright(allMeetings),
-    "\n"
-);
-log(
-    chalk.blueBright(
-        "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-    ),
-    "\n"
-);
+
+log(WHT + "Total Meetings By Venue Type", EC, "\n");
+log(BLU + "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=", EC, "\n");
+log(TAL + "In-person: " + EC + GRN + inPerson, EC);
+log(TAL + "Hybrid: " + EC + GRN + hybrid, EC);
+log(TAL + "Virtual: " + EC + GRN + virtual, EC);
+log(WHT + "Total Meetings: " + EC + GRN + allMeetings, EC, "\n");
+log(BLU + "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=", EC, "\n");
 
 rl.pause();

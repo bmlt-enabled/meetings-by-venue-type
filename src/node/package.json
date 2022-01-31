@@ -8,11 +8,5 @@
   },
   "author": "pjaudiomv",
   "license": "MIT",
-  "type": "module",
-  "bin": {
-    "meetings-by-venue-type": "./index.js"
-  },
-  "dependencies": {
-    "chalk": "^5.0.0"
-  }
+  "type": "module"
 }
