@@ -1,10 +1,10 @@
 {
-  "name": "npm",
+  "name": "meetings-by-venue-type",
   "version": "1.0.0",
   "description": "meetings-by-venue-type",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node yolo.js"
   },
   "author": "pjaudiomv",
   "license": "MIT",
@@ -13,7 +13,7 @@
     "meetings-by-venue-type": "./index.js"
   },
   "dependencies": {
-    "chalk": "^5.0.0",
-    "node-fetch": "^3.2.0"
+    "node-fetch": "^3.2.0",
+    "chalk": "^5.0.0"
   }
 }
