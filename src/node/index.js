@@ -89,7 +89,11 @@ fetch('https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerLi
                                 let region_selected_name = regions[regionSelected-1]["name"];
                                 log(chalk.magentaBright('You Selected:'), chalk.redBright(regionSelected,
                                     '[' + region_selected_name + ' (' + region_selected_id + ')]'))
-                                // return root_server_selected_url
+                                return region_selected_url
+                            })
+                            .then(regionUrl => {
+                                log('')
+                                log(chalk.magentaBright('Service Bodies:'))
                             })
                     })
             });
