@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import fetch from 'node-fetch';
+import https from 'https';
 import chalk from "chalk";
 import readline from "readline";
 
@@ -12,12 +12,29 @@ const rl = readline.createInterface({
 });
 rl.pause();
 
+async function fetch(url) {
+    return new Promise(async (resolve, reject) => {
+        let body = [];
+        const req = https.request(url, res => {
+            res.on('data', chunk => body.push(chunk));
+            res.on('end', () => {
+                const data = JSON.parse(Buffer.concat(body).toString());
+                resolve(data);
+            });
+        });
+        req.on('error', e => {
+            console.log(`ERROR httpsGet: ${e}`);
+            reject(e);
+        });
+        req.end();
+    });
+}
+
 log("");
 log(chalk.whiteBright("Get Meetings By Venue-Type"), "\n");
 log(chalk.magentaBright("Root Servers:"));
 
-const tomatoServerResponse = await fetch('https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json');
-const tomatoServersData = await tomatoServerResponse.json();
+const tomatoServersData = await fetch('https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json');
 
 let tomatoRootServers = tomatoServersData.sort(function (a, b) {
     a = a.name.toLowerCase();
@@ -57,8 +74,7 @@ log(chalk.magentaBright("You Selected:"),
 log("");
 log(chalk.magentaBright("Regions:"));
 
-const rootServerResponse = await fetch(root_server_selected_url + "client_interface/json/?switcher=GetServiceBodies");
-const rootServersData = await rootServerResponse.json();
+const rootServersData = await fetch(root_server_selected_url + "client_interface/json/?switcher=GetServiceBodies");
 
 let serviceBodies = rootServersData.sort(function (a, b) {
     a = a.name.toLowerCase();
@@ -149,11 +165,10 @@ log(
 
 log("");
 
-const meetingsResponse = await fetch(    root_server_selected_url +
+const meetingsData = await fetch(    root_server_selected_url +
     "client_interface/json/?switcher=GetSearchResults&services=" +
     service_body_selected_id +
     "&recursive=1&data_field_key=formats");
-const meetingsData = await meetingsResponse.json();
 
 let meetings = meetingsData;
 let allMeetings = 0;
