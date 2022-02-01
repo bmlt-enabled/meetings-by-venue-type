@@ -2,11 +2,18 @@
   "name": "meetings-by-venue-type",
   "version": "1.0.0",
   "description": "meetings-by-venue-type",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bmlt-enabled/meetings-by-venue-type.git"
+  },
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "author": "pjaudiomv",
   "license": "MIT",
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "prettier": "^2.5.1"
+  }
 }
