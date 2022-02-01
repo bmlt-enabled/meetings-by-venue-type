@@ -6,10 +6,10 @@
     "type": "git",
     "url": "git://github.com/bmlt-enabled/meetings-by-venue-type.git"
   },
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "start": "node index.js",
-    "format": "prettier index.js -w"
+    "start": "node main.js",
+    "format": "prettier main.js -w"
   },
   "author": "pjaudiomv",
   "license": "MIT",
