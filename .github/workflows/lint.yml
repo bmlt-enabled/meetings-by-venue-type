@@ -87,4 +87,12 @@ jobs:
         run: |
           cd src/node
           npm ci
-          npx prettier index.js --check
+          npx prettier main.js --check
+  lint-html:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Lint
+        run: |
+          sudo apt install tidy
+          tidy -errors -q src/html/main.html
