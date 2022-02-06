@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>meetings-by-venue-type</title>
+    <style>
+        body {
+            background-color: #000000;
+        }
+
+        .mag {
+            color: #ff77fc;
+        }
+
+        .red {
+            color: #ff6e68;
+        }
+
+        .wht {
+            color: #ffffff;
+        }
+
+        .blu {
+            color: #6771fb;
+        }
+
+        .tal {
+            color: #5cfdff;
+        }
+
+        .grn {
+            color: #5cfa72;
+        }
+
+        .inline {
+            display: inline
+        }
+
+        option {
+            /* Whatever color  you want */
+            color: #fffc72;
+            background-color: #000000;
+        }
+
+        select {
+            /* Whatever color  you want */
+            color: #fffc72;
+            background-color: #000000;
+        }
+
+        #regionsDiv {
+            display: none;
+        }
+
+        #serviceBodiesDiv {
+            display: none;
+        }
+
+        #tallyDiv {
+            display: none;
+        }
+
+        .container {
+            width: 700px;
+            height: 600px;
+            border: 2px solid #000;
+        }
+
+        #content {
+            width: 70%; /* 70% of the parent*/
+            margin: 10px auto;
+            border: 2px solid #000;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div id="content">
+        <div class="wht" id="title">Get Meetings By Venue-Type</div>
+        <br/>
+        <label class="mag" for="tomato-dropdown">Root Servers:&nbsp;
+            <select id="tomato-dropdown" name="tomato-roots" onChange="rootSelected()"></select>
+        </label>
+
+        <br/>
+        <br/>
+
+        <div class="mag inline" id="selectedRootLabel"></div>
+        <div class="red inline" id="selectedRoot"></div>
+
+        <br/>
+        <br/>
+
+        <div id="regionsDiv">
+            <label class="mag" for="regions-dropdown">Regions:&nbsp;
+                <select id="regions-dropdown" name="regions" onChange="regionSelected()"></select>
+            </label>
+        </div>
+
+        <br/>
+
+        <div class="mag inline" id="selectedRootServerLabel"></div>
+        <div class="red inline" id="selectedRootServer"></div>
+
+        <br/>
+        <br/>
+
+        <div id="serviceBodiesDiv">
+            <label class="mag" for="service-bodies-dropdown">Service Bodies:&nbsp;
+                <select id="service-bodies-dropdown" name="service-bodies" onChange="serviceBodiesSelected()"></select>
+            </label>
+        </div>
+
+        <br/>
+
+        <div class="mag inline" id="selectedServiceBodyLabel"></div>
+        <div class="red inline" id="selectedServiceBody"></div>
+
+        <br/>
+        <br/>
+
+        <div id="tallyDiv">
+            <div class="wht">Total Meetings By Venue Type</div>
+            <br/>
+            <div class="blu">-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=</div>
+            <br/>
+            <div class="tal inline">In-Person: &nbsp;</div>
+            <div class="grn inline" id="inPerson"></div>
+            <br/>
+            <div class="tal inline">Hybrid: &nbsp;</div>
+            <div class="grn inline" id="hybrid"></div>
+            <br/>
+            <div class="tal inline">Virtual: &nbsp;</div>
+            <div class="grn inline" id="virtual"></div>
+            <br/>
+            <div class="wht inline">Total Meetings: &nbsp;</div>
+            <div class="grn inline" id="totalMeetings"></div>
+            <br/>
+            <br/>
+            <div class="blu">-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=</div>
+        </div>
+    </div>
+</div>
+
+<script type="application/javascript">
+    async function fetchJson(url) {
+        let response = await fetch(url);
+        let data = await response.json();
+        return data;
+    }
+
+    function clearFunction(functionName) {
+        // IE8 throws an exception when you try to delete a property on window
+        // http://stackoverflow.com/a/1824228/751089
+        try {
+            delete window[functionName];
+        } catch (e) {
+            window[functionName] = undefined;
+        }
+    }
+
+    function removeScript(scriptId) {
+        let script = document.getElementById(scriptId);
+        if (script) {
+            document.getElementsByTagName('head')[0].removeChild(script);
+        }
+    }
+
+    function fetchJsonp(_url, options) {
+        if (!options) {
+            options = {};
+        }
+        // to avoid param reassign
+        let url = _url;
+        let timeout = 300000;
+        let jsonpCallback = 'callback';
+
+        let timeoutId;
+
+        return new Promise(function (resolve, reject) {
+            let callbackFunction = 'jsonp_' + Date.now().toString() + '_' + Math.ceil(Math.random() * 100000).toString();
+            let scriptId = jsonpCallback + '_' + callbackFunction;
+
+            window[callbackFunction] = function (response) {
+                resolve({
+                    ok: true,
+                    // keep consistent with fetch API
+                    json: function () {
+                        return Promise.resolve(response);
+                    },
+                });
+
+                if (timeoutId) clearTimeout(timeoutId);
+
+                removeScript(scriptId);
+
+                clearFunction(callbackFunction);
+            };
+
+            // Check if the user set their own params, and if not add a ? to start a list of params
+            url += (url.indexOf('?') === -1) ? '?' : '&';
+
+            let jsonpScript = document.createElement('script');
+            jsonpScript.setAttribute('src', url + jsonpCallback + '=' + callbackFunction);
+            if (options.charset) {
+                jsonpScript.setAttribute('charset', options.charset);
+            }
+            if (options.nonce) {
+                jsonpScript.setAttribute('nonce', options.nonce);
+            }
+            if (options.referrerPolicy) {
+                jsonpScript.setAttribute('referrerPolicy', options.referrerPolicy);
+            }
+            jsonpScript.id = scriptId;
+            document.getElementsByTagName('head')[0].appendChild(jsonpScript);
+
+            timeoutId = setTimeout(function () {
+                reject(new Error('JSONP request to ' + _url + ' timed out'));
+
+                clearFunction(callbackFunction);
+                removeScript(scriptId);
+                window[callbackFunction] = function () {
+                    clearFunction(callbackFunction);
+                };
+            }, timeout);
+
+            // Caught if got 404/500
+            jsonpScript.onerror = function () {
+                reject(new Error('JSONP request to ' + _url + ' failed'));
+
+                clearFunction(callbackFunction);
+                removeScript(scriptId);
+                if (timeoutId) clearTimeout(timeoutId);
+            };
+        });
+    }
+
+    (async () => {
+        const tomatoServersData = await fetchJson(
+            "https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json"
+        );
+        tomatoServersData.sort(function (a, b) {
+            a = a.name.toLowerCase();
+            b = b.name.toLowerCase();
+
+            return a < b ? -1 : a > b ? 1 : 0;
+        });
+        let dropdown = document.getElementById('tomato-dropdown');
+        dropdown.length = 0;
+
+        let defaultOption = document.createElement('option');
+        defaultOption.text = 'Select a root server:';
+
+        dropdown.add(defaultOption);
+        dropdown.selectedIndex = 0;
+
+        let option;
+        for (let i = 0; i < tomatoServersData.length; i++) {
+            option = document.createElement('option');
+            option.text = tomatoServersData[i].name;
+            option.value = tomatoServersData[i].rootURL;
+            dropdown.add(option);
+        }
+    })();
+
+    function rootSelected() {
+        let select = document.getElementById('tomato-dropdown');
+        let option = select.options[select.selectedIndex];
+        let rootServerId = select.selectedIndex
+        let rootServerUrl = option.value
+        let rootServerName = option.text
+        proccessSelectedRootServer(rootServerId, rootServerUrl, rootServerName)
+    }
+
+    async function proccessSelectedRootServer(rootServerId, rootServerUrl, rootServerName) {
+        document.getElementById('selectedRootLabel').innerHTML = "You selected: "
+        document.getElementById('selectedRoot').innerHTML = rootServerId + " [" + rootServerName + "]"
+        let regionsData = await fetchJsonp(rootServerUrl + 'client_interface/jsonp/?switcher=GetServiceBodies').then(function (response) {
+            return response.json();
+        })
+        regionsData.sort(function (a, b) {
+            a = a.name.toLowerCase();
+            b = b.name.toLowerCase();
+
+            return a < b ? -1 : a > b ? 1 : 0;
+        });
+
+        let regions = [];
+        for (const region of regionsData) {
+            if (region.type.includes("RS")) {
+                regions.push(region);
+            }
+        }
+
+        let regionDropdown = document.getElementById('regions-dropdown');
+        regionDropdown.length = 0;
+
+        let defaultRegionOption = document.createElement('option');
+        defaultRegionOption.text = 'Select a region:';
+
+        regionDropdown.add(defaultRegionOption);
+        regionDropdown.selectedIndex = 0;
+
+        let regionOption;
+        for (let i = 0; i < regions.length; i++) {
+            regionOption = document.createElement('option');
+            regionOption.text = regions[i].name;
+            regionOption.value = rootServerUrl + "||" + regions[i].id;
+            regionDropdown.add(regionOption);
+        }
+        document.getElementById("regionsDiv").style.display = "block";
+    }
+
+    function regionSelected() {
+        let regionSelect = document.getElementById('regions-dropdown');
+        let regionOption = regionSelect.options[regionSelect.selectedIndex];
+        let selectionId = regionSelect.selectedIndex
+        let regionUrl = regionOption.value
+        let regionName = regionOption.text
+        proccessSelectedRegion(selectionId, regionUrl, regionName)
+    }
+
+
+    async function proccessSelectedRegion(selectionId, regionUrl, regionName) {
+        const regionInfo = regionUrl.split("||");
+        let rootServerUrl = regionInfo[0];
+        let regionSelectedId = regionInfo[1];
+        document.getElementById('selectedRootServerLabel').innerHTML = "You selected: "
+        document.getElementById('selectedRootServer').innerHTML = selectionId + " [" + regionName + " (" + regionSelectedId + ")]"
+
+
+        let serviceBodiesData = await fetchJsonp(rootServerUrl + 'client_interface/jsonp/?switcher=GetServiceBodies').then(function (response) {
+            return response.json();
+        })
+        serviceBodiesData.sort(function (a, b) {
+            a = a.name.toLowerCase();
+            b = b.name.toLowerCase();
+
+            return a < b ? -1 : a > b ? 1 : 0;
+        });
+
+        let serviceBodies = [];
+        for (const serviceBody of serviceBodiesData) {
+            if (serviceBody.parent_id === regionSelectedId || serviceBody.id === regionSelectedId) {
+                serviceBodies.push(serviceBody);
+            }
+        }
+
+
+        let serviceBodiesDropdown = document.getElementById('service-bodies-dropdown');
+        serviceBodiesDropdown.length = 0;
+
+        let defaultServiceBodiesOption = document.createElement('option');
+        defaultServiceBodiesOption.text = 'Select a service body:';
+
+        serviceBodiesDropdown.add(defaultServiceBodiesOption);
+        serviceBodiesDropdown.selectedIndex = 0;
+
+        let serviceBodiesOption;
+        for (let i = 0; i < serviceBodies.length; i++) {
+            serviceBodiesOption = document.createElement('option');
+            serviceBodiesOption.text = serviceBodies[i].name;
+            serviceBodiesOption.value = rootServerUrl + "||" + serviceBodies[i].id;
+            serviceBodiesDropdown.add(serviceBodiesOption);
+        }
+        document.getElementById("serviceBodiesDiv").style.display = "block";
+    }
+
+    function serviceBodiesSelected() {
+        let serviceBodiesSelect = document.getElementById('service-bodies-dropdown');
+        let serviceBodiesOption = serviceBodiesSelect.options[serviceBodiesSelect.selectedIndex];
+        let selectionId = serviceBodiesSelect.selectedIndex
+        let regionUrl = serviceBodiesOption.value
+        let serviceBodyName = serviceBodiesOption.text
+        proccessSelectedServiceBodies(selectionId, regionUrl, serviceBodyName)
+    }
+
+    async function proccessSelectedServiceBodies(selectionId, regionUrl, serviceBodyName) {
+        const serviceBodyInfo = regionUrl.split("||");
+        let rootServerUrl = serviceBodyInfo[0];
+        let serviceBodySelectedId = serviceBodyInfo[1];
+        document.getElementById('selectedServiceBodyLabel').innerHTML = "You selected: "
+        document.getElementById('selectedServiceBody').innerHTML = selectionId + " [" + serviceBodyName + " (" + serviceBodySelectedId + ")]"
+        let meetingsData = await fetchJsonp(rootServerUrl + 'client_interface/jsonp/?switcher=GetSearchResults&services=' + serviceBodySelectedId + '&recursive=1&data_field_key=formats').then(function (response) {
+            return response.json();
+        })
+        tally(meetingsData)
+    }
+
+    function tally(data) {
+        let totalMeetings, inPerson, virtual, hybrid, tempVirtual, tempClosed;
+        totalMeetings = inPerson = virtual = hybrid = tempVirtual = tempClosed = 0;
+
+        for (const meeting of data) {
+            let formats = meeting.formats.split(",");
+            if (
+                !formats.includes("VM") &&
+                !formats.includes("TC") &&
+                !formats.includes("HY")
+            ) {
+                inPerson++;
+            } else if (
+                formats.includes("VM") &&
+                !formats.includes("TC") &&
+                !formats.includes("HY")
+            ) {
+                virtual++;
+            } else if (
+                formats.includes("VM") &&
+                formats.includes("TC") &&
+                !formats.includes("HY")
+            ) {
+                virtual++;
+                tempVirtual++;
+            } else if (
+                !formats.includes("VM") &&
+                !formats.includes("TC") &&
+                formats.includes("HY")
+            ) {
+                hybrid++;
+            } else if (
+                formats.includes("VM") &&
+                !formats.includes("TC") &&
+                formats.includes("HY")
+            ) {
+                hybrid++;
+            } else if (
+                !formats.includes("VM") &&
+                formats.includes("TC") &&
+                !formats.includes("HY")
+            ) {
+                tempClosed++;
+            }
+            totalMeetings++;
+        }
+
+        let totals = {
+            inPerson: inPerson,
+            virtual: virtual,
+            tempVirtual: tempVirtual,
+            hybrid: hybrid,
+            tempClosed: tempClosed,
+            totalMeetings: totalMeetings,
+        };
+        document.getElementById("tallyDiv").style.display = "block";
+        document.getElementById('inPerson').innerHTML = inPerson
+        document.getElementById('hybrid').innerHTML = hybrid
+        document.getElementById('virtual').innerHTML = virtual
+        document.getElementById('totalMeetings').innerHTML = totalMeetings
+    }
+</script>
+</body>
+</html> 
