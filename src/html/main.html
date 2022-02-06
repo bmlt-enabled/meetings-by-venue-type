@@ -50,7 +50,7 @@
         }
 
         #content {
-            width: 70%; /* 70% of the parent*/
+            width: 90%; /* 70% of the parent*/
             margin: 10px auto;
             border: 2px solid #000;
         }
@@ -443,10 +443,10 @@
             totalMeetings: totalMeetings,
         };
         document.getElementById("tallyDiv").style.display = "block";
-        document.getElementById('inPerson').innerHTML = inPerson
-        document.getElementById('hybrid').innerHTML = hybrid
-        document.getElementById('virtual').innerHTML = virtual
-        document.getElementById('totalMeetings').innerHTML = totalMeetings
+        document.getElementById('inPerson').innerHTML = totals.inPerson
+        document.getElementById('hybrid').innerHTML = totals.hybrid
+        document.getElementById('virtual').innerHTML = totals.virtual
+        document.getElementById('totalMeetings').innerHTML = totals.totalMeetings
     }
 </script>
 </body>
