@@ -73,7 +73,7 @@
     </style>
 </head>
 
-<body>
+<body onload="loadTomato()">
 <div class="container">
     <div id="content">
         <div class="wht" id="title">Get Meetings By Venue-Type</div>
@@ -143,22 +143,6 @@
 </div>
 
 <script type="application/javascript">
-    async function fetchJson(url) {
-        let response = await fetch(url);
-        let data = await response.json();
-        return data;
-    }
-
-    function clearFunction(functionName) {
-        // IE8 throws an exception when you try to delete a property on window
-        // http://stackoverflow.com/a/1824228/751089
-        try {
-            delete window[functionName];
-        } catch (e) {
-            window[functionName] = undefined;
-        }
-    }
-
     function removeScript(scriptId) {
         let script = document.getElementById(scriptId);
         if (script) {
@@ -194,7 +178,7 @@
 
                 removeScript(scriptId);
 
-                clearFunction(callbackFunction);
+                delete window[callbackFunction];
             };
 
             // Check if the user set their own params, and if not add a ? to start a list of params
@@ -217,10 +201,10 @@
             timeoutId = setTimeout(function () {
                 reject(new Error('JSONP request to ' + _url + ' timed out'));
 
-                clearFunction(callbackFunction);
+                delete window[callbackFunction];
                 removeScript(scriptId);
                 window[callbackFunction] = function () {
-                    clearFunction(callbackFunction);
+                    delete window[callbackFunction];
                 };
             }, timeout);
 
@@ -228,17 +212,17 @@
             jsonpScript.onerror = function () {
                 reject(new Error('JSONP request to ' + _url + ' failed'));
 
-                clearFunction(callbackFunction);
+                delete window[callbackFunction];
                 removeScript(scriptId);
                 if (timeoutId) clearTimeout(timeoutId);
             };
         });
     }
 
-    (async () => {
-        const tomatoServersData = await fetchJson(
-            "https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json"
-        );
+    async function loadTomato() {
+        const tomatoServersData = await fetch('https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json').then(function (response) {
+            return response.json();
+        })
         tomatoServersData.sort(function (a, b) {
             a = a.name.toLowerCase();
             b = b.name.toLowerCase();
@@ -261,7 +245,7 @@
             option.value = tomatoServersData[i].rootURL;
             dropdown.add(option);
         }
-    })();
+    }
 
     function rootSelected() {
         let select = document.getElementById('tomato-dropdown');
