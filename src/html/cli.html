@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>meetings-by-venue-type</title>
+    <style>
+        body {
+            background-color: #000000;
+        }
+
+        option {
+            color: #fffc72;
+            background-color: #000000;
+        }
+
+        select {
+            color: #fffc72;
+            background-color: #000000;
+        }
+
+        .input {
+            color: #bfbfbf;
+            border: none;
+            background-color: transparent;
+            resize: none;
+            outline: none;
+        }
+
+        #input {
+            display: inline;
+            word-break: break-all;
+            outline: none;
+            visibility: visible;
+        }
+
+        #ts-caret {
+            border: 0;
+            padding: 0;
+            outline: none;
+            background-color: #bfbfbf;
+            display: inline-block;
+            font-family: monospace;
+        }
+
+        #sr-caret {
+            border: 0;
+            padding: 0;
+            outline: none;
+            background-color: #bfbfbf;
+            font-family: monospace;
+            display: none;
+        }
+        #sb-caret {
+            border: 0;
+            padding: 0;
+            outline: none;
+            background-color: #bfbfbf;
+            font-family: monospace;
+            display: none;
+        }
+
+        .ylw {
+            color: #fffc72;
+        }
+        .mag {
+            color: #ff77fc;
+        }
+
+        .red {
+            color: #ff6e68;
+        }
+
+        .wht {
+            color: #ffffff;
+        }
+
+        .blu {
+            color: #6771fb;
+        }
+
+        .tal {
+            color: #5cfdff;
+        }
+
+        .grn {
+            color: #5cfa72;
+        }
+
+        .container {
+            width: 700px;
+            height: 600px;
+            border: 2px solid #000;
+        }
+
+        #content {
+            width: 95%;
+            margin: 10px auto;
+            border: 2px solid #000;
+        }
+
+        .inline {
+            display: inline
+        }
+
+        #regionsDiv {
+            display: none;
+        }
+
+        #serviceBodiesDiv {
+            display: none;
+        }
+
+        #tallyDiv {
+            display: none;
+        }
+    </style>
+</head>
+
+<body onload="loadTomato()">
+<div class="container">
+    <div id="content">
+        <div class="wht" id="title">Get Meetings By Venue-Type</div>
+        <br/>
+
+        <div class="mag inline">Root Servers:&nbsp;</div>
+        <div class="ylw" id="tomato-roots"></div>
+
+        <br/>
+
+        <div class="mag inline">Select a root server:&nbsp;</div><div id="ts-caret">&nbsp;</div>
+        <input type="text" id="root-selection" class="input">
+
+        <br/>
+        <br/>
+
+        <div class="mag inline" id="selectedRootLabel"></div>
+        <div class="red inline" id="selectedRoot"></div>
+
+
+
+        <br/>
+        <br/>
+
+        <div id="regionsDiv">
+            <div class="mag inline regionsDiv">Regions:&nbsp;</div>
+            <div class="ylw" id="regions"></div>
+            <br/>
+            <div class="mag inline">Select a region: &nbsp;</div>
+            <div id="sr-caret">&nbsp;</div>
+            <input type="text" id="region-selection" class="input">
+        </div>
+
+
+        <br/>
+
+        <div class="mag inline" id="selectedRegionLabel"></div>
+        <div class="red inline" id="selectedRegion"></div>
+
+        <br/>
+        <br/>
+
+        <div id="serviceBodiesDiv">
+            <div class="mag inline">Service Bodies:&nbsp;</div>
+            <div class="ylw" id="serviceBodies"></div>
+            <br/>
+            <div class="mag inline">Select a service body: &nbsp;</div>
+            <div id="sb-caret">&nbsp;</div>
+            <input type="text" id="service-bodies-selection" class="input">
+        </div>
+
+        <br/>
+
+        <div class="mag inline" id="selectedServiceBodyLabel"></div>
+        <div class="red inline" id="selectedServiceBody"></div>
+
+        <br/>
+        <br/>
+
+        <div id="tallyDiv">
+            <div class="wht">Total Meetings By Venue Type</div>
+            <br/>
+            <div class="blu">-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=</div>
+            <br/>
+            <div class="tal inline">In-Person: &nbsp;</div>
+            <div class="grn inline" id="inPerson"></div>
+            <br/>
+            <div class="tal inline">Hybrid: &nbsp;</div>
+            <div class="grn inline" id="hybrid"></div>
+            <br/>
+            <div class="tal inline">Virtual: &nbsp;</div>
+            <div class="grn inline" id="virtual"></div>
+            <br/>
+            <div class="wht inline">Total Meetings: &nbsp;</div>
+            <div class="grn inline" id="totalMeetings"></div>
+            <br/>
+            <br/>
+            <div class="blu">-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=</div>
+        </div>
+    </div>
+</div>
+
+<script type="application/javascript">
+    function removeScript(scriptId) {
+        let script = document.getElementById(scriptId);
+        if (script) {
+            document.getElementsByTagName('head')[0].removeChild(script);
+        }
+    }
+
+    function fetchJsonp(_url, options) {
+        if (!options) {
+            options = {};
+        }
+        // to avoid param reassign
+        let url = _url;
+        let timeout = 300000;
+        let jsonpCallback = 'callback';
+
+        let timeoutId;
+
+        return new Promise(function (resolve, reject) {
+            let callbackFunction = 'jsonp_' + Date.now().toString() + '_' + Math.ceil(Math.random() * 100000).toString();
+            let scriptId = jsonpCallback + '_' + callbackFunction;
+
+            window[callbackFunction] = function (response) {
+                resolve({
+                    ok: true,
+                    // keep consistent with fetch API
+                    json: function () {
+                        return Promise.resolve(response);
+                    },
+                });
+
+                if (timeoutId) clearTimeout(timeoutId);
+
+                removeScript(scriptId);
+
+                delete window[callbackFunction];
+            };
+
+            // Check if the user set their own params, and if not add a ? to start a list of params
+            url += (url.indexOf('?') === -1) ? '?' : '&';
+
+            let jsonpScript = document.createElement('script');
+            jsonpScript.setAttribute('src', url + jsonpCallback + '=' + callbackFunction);
+            if (options.charset) {
+                jsonpScript.setAttribute('charset', options.charset);
+            }
+            if (options.nonce) {
+                jsonpScript.setAttribute('nonce', options.nonce);
+            }
+            if (options.referrerPolicy) {
+                jsonpScript.setAttribute('referrerPolicy', options.referrerPolicy);
+            }
+            jsonpScript.id = scriptId;
+            document.getElementsByTagName('head')[0].appendChild(jsonpScript);
+
+            timeoutId = setTimeout(function () {
+                reject(new Error('JSONP request to ' + _url + ' timed out'));
+
+                delete window[callbackFunction];
+                removeScript(scriptId);
+                window[callbackFunction] = function () {
+                    delete window[callbackFunction];
+                };
+            }, timeout);
+
+            // Caught if got 404/500
+            jsonpScript.onerror = function () {
+                reject(new Error('JSONP request to ' + _url + ' failed'));
+
+                delete window[callbackFunction];
+                removeScript(scriptId);
+                if (timeoutId) clearTimeout(timeoutId);
+            };
+        });
+    }
+
+    async function loadTomato() {
+        const tomatoServersData = await fetch('https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json').then(function (response) {
+            return response.json();
+        })
+        tomatoServersData.sort(function (a, b) {
+            a = a.name.toLowerCase();
+            b = b.name.toLowerCase();
+
+            return a < b ? -1 : a > b ? 1 : 0;
+        });
+
+        let displayServers = document.getElementById('tomato-roots');
+        let tsc = 1
+        for (let i = 0; i < tomatoServersData.length; i++) {
+            displayServers.innerHTML += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + tsc + " " + tomatoServersData[i].name + "<br>"
+            tsc++
+        }
+
+        const tomatoInput = document.getElementById('root-selection');
+
+        tomatoInput.onkeydown = function(event){
+            if(event.key === 'Enter') {
+                document.getElementById("ts-caret").style.display = "none";
+                proccessSelectedRootServer(tomatoInput.value, tomatoServersData[tomatoInput.value -1])
+            }
+        }
+    }
+    
+    async function proccessSelectedRootServer(selectionNumber, selectedRootServer) {
+        document.getElementById('selectedRootLabel').innerHTML = "You selected: "
+        document.getElementById('selectedRoot').innerHTML =  + selectionNumber + " [" + selectedRootServer.name + "]"
+        let regionsData = await fetchJsonp(selectedRootServer.rootURL + 'client_interface/jsonp/?switcher=GetServiceBodies').then(function (response) {
+            return response.json();
+        })
+        regionsData.sort(function (a, b) {
+            a = a.name.toLowerCase();
+            b = b.name.toLowerCase();
+
+            return a < b ? -1 : a > b ? 1 : 0;
+        });
+
+        let regions = [];
+        for (const region of regionsData) {
+            if (region.type.includes("RS")) {
+                regions.push(region);
+            }
+        }
+
+        let displayRegions = document.getElementById('regions');
+        let rsc = 1
+        displayRegions.innerHTML = ""
+        for (let i = 0; i < regions.length; i++) {
+            displayRegions.innerHTML += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + rsc + " " + regions[i].name + "<br>"
+            rsc++
+        }
+        document.getElementById("regionsDiv").style.display = "block";
+        document.getElementById("sr-caret").style.display = "inline-block";
+
+        const regionInput = document.getElementById('region-selection');
+
+        regionInput.onkeydown = function(event){
+            if(event.key === 'Enter') {
+                document.getElementById("sr-caret").style.display = "none";
+                proccessSelectedRegion1(regionInput.value, regions[regionInput.value -1], regionsData, selectedRootServer.rootURL)
+            }
+        }
+    }
+
+    async function proccessSelectedRegion1(selectionNumber, selectedRegion, regionsData, rootServerUrl) {
+        document.getElementById('selectedRegionLabel').innerHTML = "You selected: "
+        document.getElementById('selectedRegion').innerHTML =  + selectionNumber + " [" + selectedRegion.name + " (" + selectedRegion.id + ")]"
+
+
+        let serviceBodiesData = await fetchJsonp(rootServerUrl + 'client_interface/jsonp/?switcher=GetServiceBodies').then(function (response) {
+            return response.json();
+        })
+        serviceBodiesData.sort(function (a, b) {
+            a = a.name.toLowerCase();
+            b = b.name.toLowerCase();
+
+            return a < b ? -1 : a > b ? 1 : 0;
+        });
+
+        let serviceBodies = [];
+        for (const serviceBody of serviceBodiesData) {
+            if (serviceBody.parent_id === selectedRegion.id || serviceBody.id === selectedRegion.id) {
+                serviceBodies.push(serviceBody);
+            }
+        }
+
+        let displayServiceBodies = document.getElementById('serviceBodies');
+        let sbc = 1
+        displayServiceBodies.innerHTML = ""
+        for (let i = 0; i < serviceBodies.length; i++) {
+            displayServiceBodies.innerHTML += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + sbc + " " + serviceBodies[i].name + "<br>"
+            sbc++
+        }
+
+        document.getElementById("serviceBodiesDiv").style.display = "block";
+        document.getElementById("sb-caret").style.display = "inline-block";
+
+        const serviceBodyInput = document.getElementById('service-bodies-selection');
+
+        serviceBodyInput.onkeydown = function(event){
+            if(event.key === 'Enter') {
+                document.getElementById("sb-caret").style.display = "none";
+                proccessSelectedServiceBodies1(serviceBodyInput.value, serviceBodies[selectionNumber-1], rootServerUrl)
+            }
+        }
+    }
+
+    async function proccessSelectedServiceBodies1(selectionId, serviceBody, rootServerUrl) {
+        //console.log(selectionId, serviceBody, rootServerUrl)
+        document.getElementById('selectedServiceBodyLabel').innerHTML = "You selected: "
+        document.getElementById('selectedServiceBody').innerHTML = selectionId + " [" + serviceBody.name + " (" + serviceBody.id + ")]"
+        let meetingsData = await fetchJsonp(rootServerUrl + 'client_interface/jsonp/?switcher=GetSearchResults&services=' + serviceBody.id + '&recursive=1&data_field_key=formats').then(function (response) {
+            return response.json();
+        })
+        tally(meetingsData)
+    }
+
+    function tally(data) {
+        let totalMeetings, inPerson, virtual, hybrid, tempVirtual, tempClosed;
+        totalMeetings = inPerson = virtual = hybrid = tempVirtual = tempClosed = 0;
+
+        for (const meeting of data) {
+            let formats = meeting.formats.split(",");
+            if (
+                !formats.includes("VM") &&
+                !formats.includes("TC") &&
+                !formats.includes("HY")
+            ) {
+                inPerson++;
+            } else if (
+                formats.includes("VM") &&
+                !formats.includes("TC") &&
+                !formats.includes("HY")
+            ) {
+                virtual++;
+            } else if (
+                formats.includes("VM") &&
+                formats.includes("TC") &&
+                !formats.includes("HY")
+            ) {
+                virtual++;
+                tempVirtual++;
+            } else if (
+                !formats.includes("VM") &&
+                !formats.includes("TC") &&
+                formats.includes("HY")
+            ) {
+                hybrid++;
+            } else if (
+                formats.includes("VM") &&
+                !formats.includes("TC") &&
+                formats.includes("HY")
+            ) {
+                hybrid++;
+            } else if (
+                !formats.includes("VM") &&
+                formats.includes("TC") &&
+                !formats.includes("HY")
+            ) {
+                tempClosed++;
+            }
+            totalMeetings++;
+        }
+
+        let totals = {
+            inPerson: inPerson,
+            virtual: virtual,
+            tempVirtual: tempVirtual,
+            hybrid: hybrid,
+            tempClosed: tempClosed,
+            totalMeetings: totalMeetings,
+        };
+        document.getElementById("tallyDiv").style.display = "block";
+        document.getElementById('inPerson').innerHTML = totals.inPerson
+        document.getElementById('hybrid').innerHTML = totals.hybrid
+        document.getElementById('virtual').innerHTML = totals.virtual
+        document.getElementById('totalMeetings').innerHTML = totals.totalMeetings
+    }
+</script>
+</body>
+</html> 
