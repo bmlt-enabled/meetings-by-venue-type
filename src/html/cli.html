@@ -89,6 +89,10 @@
             color: #5cfa72;
         }
 
+        .red {
+            color: #fb6c65;
+        }
+
         .container {
             width: 700px;
             height: 600px;
@@ -132,6 +136,7 @@
         <input type="text" id="root-selection" class="input">
         <br/>
         <br/>
+        <div class="red" id="ts-warning"></div>
         <div class="mag inline" id="selectedRootLabel"></div>
         <div class="red inline" id="selectedRoot"></div>
         <br/>
@@ -283,8 +288,14 @@
 
         tomatoInput.onkeydown = function (event) {
             if (event.key === 'Enter') {
-                document.getElementById("ts-caret").style.display = "none";
-                proccessSelectedRootServer(tomatoInput.value, tomatoServersData[tomatoInput.value - 1])
+                if (tomatoInput.value > tomatoServersData.length) {
+                    document.getElementById('ts-warning').innerHTML = "Error: Selection must match one of the choices."
+                    document.getElementById("ts-warning").style.display = "block";
+                } else {
+                    document.getElementById("ts-warning").style.display = "none";
+                    document.getElementById("ts-caret").style.display = "none";
+                    proccessSelectedRootServer(tomatoInput.value, tomatoServersData[tomatoInput.value - 1])
+                }
             }
         }
     }
