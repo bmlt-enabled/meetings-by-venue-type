@@ -47,6 +47,8 @@ def print_totals(totals):
         f"{Bcolors.TAL}Virtual: {Bcolors.EC}{Bcolors.GRN}{totals['virtual']}{Bcolors.EC}")
     print(
         f"{Bcolors.WHT}Total Meetings: {Bcolors.EC}{Bcolors.GRN}{totals['total']}{Bcolors.EC}")
+    print(
+        f"{Bcolors.WHT}Total Groups: {Bcolors.EC}{Bcolors.GRN}{totals['totalGroups']}{Bcolors.EC}")
     pretty()
 
 
@@ -72,6 +74,21 @@ def get_url(url):
             'user-agent': 'User-Agent", "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0) +bmltpy'
         })
     return json.loads(req.data.decode())
+
+
+def calculateTotalGroups(data):
+    meeting_map = {}
+    for meeting in data:
+        service_body_id = meeting["service_body_bigint"]
+        meeting_name = meeting["meeting_name"]
+        if service_body_id in meeting_map:
+            if meeting_name not in meeting_map[service_body_id]:
+                meeting_map[service_body_id].append(meeting_name)
+        else:
+            meeting_map[service_body_id] = [meeting_name]
+
+    meeting_counts = {key: len(value) for key, value in meeting_map.items()}
+    return sum(meeting_counts.values())
 
 
 def populate():
@@ -158,10 +175,11 @@ def populate():
 
     selected_service_body_id = service_bodies[int(service_body_input)]['id']
     meetings_data = get_url(
-        f"{selected_root_server_url}/client_interface/json/?switcher=GetSearchResults&services={selected_service_body_id}&recursive=1&data_field_key=formats"
+        f"{selected_root_server_url}/client_interface/json/?switcher=GetSearchResults&services={selected_service_body_id}&recursive=1&data_field_key=formats,meeting_name,service_body_bigint"
         )
 
     in_person = hybrid = virtual = temp_virtual = temp_closed = total = 0
+    totalGroups = calculateTotalGroups(meetings_data)
     for meeting in meetings_data:
         formats = meeting['formats'].split(",")
         if "VM" not in formats and "TC" not in formats and "HY" not in formats:
@@ -187,7 +205,8 @@ def populate():
         'tempvirtual': temp_virtual,
         'hybrid': hybrid,
         'tempclosed': temp_closed,
-        'total': total
+        'total': total,
+        'totalGroups': totalGroups
     }
 
 
