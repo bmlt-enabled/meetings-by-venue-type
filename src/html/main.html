@@ -362,23 +362,20 @@
         proccessSelectedServiceBodies(selectionId, regionUrl, serviceBodyName)
     }
 
-    function proccessGroupCount(data) {
+    function calculateTotalGroups(data) {
         const meetingMap = {};
-        for (let meeting of data) {
-            const serviceBodyId = meeting["service_body_bigint"];
-            const meetingName = meeting["meeting_name"];
+
+        data.forEach(meeting => {
+            const { service_body_bigint: serviceBodyId, meeting_name: meetingName } = meeting;
+            const normalizedMeetingName = meetingName.trim().toLowerCase();
             if (!meetingMap[serviceBodyId]) {
-                meetingMap[serviceBodyId] = [];
+                meetingMap[serviceBodyId] = new Set();
             }
-            if (!meetingMap[serviceBodyId].includes(meetingName)) {
-                meetingMap[serviceBodyId].push(meetingName);
-            }
-        }
+            meetingMap[serviceBodyId].add(normalizedMeetingName);
+        });
 
         let totalGroups = 0;
-        for (let key in meetingMap) {
-            totalGroups += meetingMap[key].length;
-        }
+        Object.values(meetingMap).forEach(set => totalGroups += set.size);
 
         return totalGroups;
     }
@@ -398,7 +395,7 @@
     function tally(data) {
         let totalMeetings, inPerson, virtual, hybrid, tempVirtual, tempClosed;
         totalMeetings = inPerson = virtual = hybrid = tempVirtual = tempClosed = 0;
-        let totalGroups = proccessGroupCount(data)
+        let totalGroups = calculateTotalGroups(data)
         for (const meeting of data) {
             let formats = meeting.formats.split(",");
             if (
