@@ -7,7 +7,7 @@ on:
 jobs:
   release:
     name: Create Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/create-release@latest
         env:
@@ -32,7 +32,7 @@ jobs:
           - goarch: "arm64"
             goos: windows
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: wangyoucao577/go-release-action@v1.20
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
