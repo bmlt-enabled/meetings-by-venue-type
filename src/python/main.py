@@ -3,6 +3,7 @@
 import sys
 import json
 import urllib3
+from collections import defaultdict
 
 # pylint: disable=line-too-long
 # pylint: disable=too-few-public-methods
@@ -77,18 +78,12 @@ def get_url(url):
 
 
 def calculateTotalGroups(data):
-    meeting_map = {}
+    meeting_map = defaultdict(set)
     for meeting in data:
         service_body_id = meeting["service_body_bigint"]
         meeting_name = meeting["meeting_name"]
-        if service_body_id in meeting_map:
-            if meeting_name not in meeting_map[service_body_id]:
-                meeting_map[service_body_id].append(meeting_name)
-        else:
-            meeting_map[service_body_id] = [meeting_name]
-
-    meeting_counts = {key: len(value) for key, value in meeting_map.items()}
-    return sum(meeting_counts.values())
+        meeting_map[service_body_id].add(meeting_name)
+    return sum(len(names) for names in meeting_map.values())
 
 
 def populate():
