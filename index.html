@@ -366,7 +366,7 @@
         const meetingMap = {};
         for (let meeting of data) {
             const serviceBodyId = meeting["service_body_bigint"];
-            const meetingName = meeting["meeting_name"];
+            const meetingName = meeting["meeting_name"].trim().toLowerCase();
             if (!meetingMap[serviceBodyId]) {
                 meetingMap[serviceBodyId] = [];
             }
