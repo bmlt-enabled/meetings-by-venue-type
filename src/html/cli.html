@@ -294,13 +294,13 @@
                 } else {
                     document.getElementById("ts-warning").style.display = "none";
                     document.getElementById("ts-caret").style.display = "none";
-                    proccessSelectedRootServer(tomatoInput.value, tomatoServersData[tomatoInput.value - 1])
+                    processSelectedRootServer(tomatoInput.value, tomatoServersData[tomatoInput.value - 1])
                 }
             }
         }
     }
 
-    async function proccessSelectedRootServer(selectionNumber, selectedRootServer) {
+    async function processSelectedRootServer(selectionNumber, selectedRootServer) {
         document.getElementById('selectedRootLabel').innerHTML = "You selected: "
         document.getElementById('selectedRoot').innerHTML = +selectionNumber + " [" + selectedRootServer.name + "]"
         let regionsData = await fetchJsonp(selectedRootServer.rootURL + 'client_interface/jsonp/?switcher=GetServiceBodies').then(function (response) {
@@ -335,12 +335,12 @@
         regionInput.onkeydown = function (event) {
             if (event.key === 'Enter') {
                 document.getElementById("sr-caret").style.display = "none";
-                proccessSelectedRegion1(regionInput.value, regions[regionInput.value - 1], regionsData, selectedRootServer.rootURL)
+                processSelectedRegion1(regionInput.value, regions[regionInput.value - 1], regionsData, selectedRootServer.rootURL)
             }
         }
     }
 
-    async function proccessSelectedRegion1(selectionNumber, selectedRegion, regionsData, rootServerUrl) {
+    async function processSelectedRegion1(selectionNumber, selectedRegion, regionsData, rootServerUrl) {
         document.getElementById('selectedRegionLabel').innerHTML = "You selected: "
         document.getElementById('selectedRegion').innerHTML = +selectionNumber + " [" + selectedRegion.name + " (" + selectedRegion.id + ")]"
 
@@ -376,12 +376,12 @@
         serviceBodyInput.onkeydown = function (event) {
             if (event.key === 'Enter') {
                 document.getElementById("sb-caret").style.display = "none";
-                proccessSelectedServiceBodies(serviceBodyInput.value, serviceBodies[selectionNumber - 1], rootServerUrl)
+                processSelectedServiceBodies(serviceBodyInput.value, serviceBodies[selectionNumber - 1], rootServerUrl)
             }
         }
     }
 
-    async function proccessSelectedServiceBodies(selectionId, serviceBody, rootServerUrl) {
+    async function processSelectedServiceBodies(selectionId, serviceBody, rootServerUrl) {
         document.getElementById('selectedServiceBodyLabel').innerHTML = "You selected: "
         document.getElementById('selectedServiceBody').innerHTML = selectionId + " [" + serviceBody.name + " (" + serviceBody.id + ")]"
         let meetingsData = await fetchJsonp(rootServerUrl + 'client_interface/jsonp/?switcher=GetSearchResults&services=' + serviceBody.id + '&recursive=1&data_field_key=formats').then(function (response) {

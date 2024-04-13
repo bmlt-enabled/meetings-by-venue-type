@@ -256,10 +256,10 @@
         let rootServerId = select.selectedIndex
         let rootServerUrl = option.value
         let rootServerName = option.text
-        proccessSelectedRootServer(rootServerId, rootServerUrl, rootServerName)
+        processSelectedRootServer(rootServerId, rootServerUrl, rootServerName)
     }
 
-    async function proccessSelectedRootServer(rootServerId, rootServerUrl, rootServerName) {
+    async function processSelectedRootServer(rootServerId, rootServerUrl, rootServerName) {
         document.getElementById('selectedRootLabel').innerHTML = "You selected: "
         document.getElementById('selectedRoot').innerHTML = rootServerId + " [" + rootServerName + "]"
         let regionsData = await fetchJsonp(rootServerUrl + 'client_interface/jsonp/?switcher=GetServiceBodies').then(function (response) {
@@ -304,11 +304,11 @@
         let selectionId = regionSelect.selectedIndex
         let regionUrl = regionOption.value
         let regionName = regionOption.text
-        proccessSelectedRegion(selectionId, regionUrl, regionName)
+        processSelectedRegion(selectionId, regionUrl, regionName)
     }
 
 
-    async function proccessSelectedRegion(selectionId, regionUrl, regionName) {
+    async function processSelectedRegion(selectionId, regionUrl, regionName) {
         const regionInfo = regionUrl.split("||");
         let rootServerUrl = regionInfo[0];
         let regionSelectedId = regionInfo[1];
@@ -359,7 +359,7 @@
         let selectionId = serviceBodiesSelect.selectedIndex
         let regionUrl = serviceBodiesOption.value
         let serviceBodyName = serviceBodiesOption.text
-        proccessSelectedServiceBodies(selectionId, regionUrl, serviceBodyName)
+        processSelectedServiceBodies(selectionId, regionUrl, serviceBodyName)
     }
 
     function calculateTotalGroups(data) {
@@ -380,7 +380,7 @@
         return totalGroups;
     }
 
-    async function proccessSelectedServiceBodies(selectionId, regionUrl, serviceBodyName) {
+    async function processSelectedServiceBodies(selectionId, regionUrl, serviceBodyName) {
         const serviceBodyInfo = regionUrl.split("||");
         let rootServerUrl = serviceBodyInfo[0];
         let serviceBodySelectedId = serviceBodyInfo[1];
