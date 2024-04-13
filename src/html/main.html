@@ -136,6 +136,9 @@
             <div class="wht inline">Total Meetings: &nbsp;</div>
             <div class="grn inline" id="totalMeetings"></div>
             <br/>
+            <div class="wht inline">Total Groups: &nbsp;</div>
+            <div class="grn inline" id="totalGroups"></div>
+            <br/>
             <br/>
             <div class="blu">-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=</div>
         </div>
@@ -359,13 +362,34 @@
         proccessSelectedServiceBodies(selectionId, regionUrl, serviceBodyName)
     }
 
+    function proccessGroupCount(data) {
+        const meetingMap = {};
+        for (let meeting of data) {
+            const serviceBodyId = meeting["service_body_bigint"];
+            const meetingName = meeting["meeting_name"];
+            if (!meetingMap[serviceBodyId]) {
+                meetingMap[serviceBodyId] = [];
+            }
+            if (!meetingMap[serviceBodyId].includes(meetingName)) {
+                meetingMap[serviceBodyId].push(meetingName);
+            }
+        }
+
+        let totalGroups = 0;
+        for (let key in meetingMap) {
+            totalGroups += meetingMap[key].length;
+        }
+
+        return totalGroups;
+    }
+
     async function proccessSelectedServiceBodies(selectionId, regionUrl, serviceBodyName) {
         const serviceBodyInfo = regionUrl.split("||");
         let rootServerUrl = serviceBodyInfo[0];
         let serviceBodySelectedId = serviceBodyInfo[1];
         document.getElementById('selectedServiceBodyLabel').innerHTML = "You selected: "
         document.getElementById('selectedServiceBody').innerHTML = selectionId + " [" + serviceBodyName + " (" + serviceBodySelectedId + ")]"
-        let meetingsData = await fetchJsonp(rootServerUrl + 'client_interface/jsonp/?switcher=GetSearchResults&services=' + serviceBodySelectedId + '&recursive=1&data_field_key=formats').then(function (response) {
+        let meetingsData = await fetchJsonp(rootServerUrl + 'client_interface/jsonp/?switcher=GetSearchResults&services=' + serviceBodySelectedId + '&recursive=1&data_field_key=formats,meeting_name,service_body_bigint').then(function (response) {
             return response.json();
         })
         tally(meetingsData)
@@ -374,7 +398,7 @@
     function tally(data) {
         let totalMeetings, inPerson, virtual, hybrid, tempVirtual, tempClosed;
         totalMeetings = inPerson = virtual = hybrid = tempVirtual = tempClosed = 0;
-
+        let totalGroups = proccessGroupCount(data)
         for (const meeting of data) {
             let formats = meeting.formats.split(",");
             if (
@@ -425,12 +449,14 @@
             hybrid: hybrid,
             tempClosed: tempClosed,
             totalMeetings: totalMeetings,
+            totalGroups: totalGroups
         };
         document.getElementById("tallyDiv").style.display = "block";
         document.getElementById('inPerson').innerHTML = totals.inPerson
         document.getElementById('hybrid').innerHTML = totals.hybrid
         document.getElementById('virtual').innerHTML = totals.virtual
         document.getElementById('totalMeetings').innerHTML = totals.totalMeetings
+        document.getElementById('totalGroups').innerHTML = totals.totalGroups
     }
 </script>
 </body>

@@ -168,4 +168,8 @@ cython_debug/
 
 
 node_modules/
+bin/
+obj/
+java/
+
 
