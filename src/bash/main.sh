@@ -9,6 +9,18 @@ TAL="\033[1;36m"
 BLU="\033[1;34m"
 EC="\033[0m"
 
+calculateTotalGroups() {
+    local json_data=$1
+    declare -A uniqueMeetings
+
+    while IFS=$'\t' read -r serviceBodyID meetingName; do
+        local uniqueKey="${serviceBodyID}_${meetingName}"
+        uniqueMeetings["$uniqueKey"]=1
+    done < <(jq -r '.[] | [.service_body_bigint, .meeting_name | ascii_downcase | gsub("[ \\t\\r\\n]+"; "")] | @tsv' <<< "$json_data")
+
+    echo ${#uniqueMeetings[@]}
+}
+
 echo -e "${WHT}\nGet Meetings By Venue-Type \n${EC}"
 
 echo -e "${PRPL}Root Servers: ${EC}"
@@ -71,7 +83,7 @@ SELECTED_SERVICE_BODY_ID=$(echo "$SELECTED_SERVICE_BODY" | jq -r '.id')
 echo -en "${PRPL}\nYou selected: ${EC}"
 echo -en "${RED}$region_input [$SELECTED_SERVICE_BODY_NAME ($SELECTED_SERVICE_BODY_ID)]${EC}\n"
 
-MEETINGS=$(curl -s "$SELECTED_ROOT_SERVER_URL/client_interface/json/?switcher=GetSearchResults&services=$SELECTED_SERVICE_BODY_ID&recursive=1&data_field_key=formats" | jq -r -c '.[].formats')
+MEETINGS=$(curl -s "$SELECTED_ROOT_SERVER_URL/client_interface/json/?switcher=GetSearchResults&services=$SELECTED_SERVICE_BODY_ID&recursive=1&data_field_key=formats,meeting_name,service_body_bigint")
 
 INPERSON=0
 VIRTUAL=0
@@ -99,8 +111,9 @@ while read -r i; do
       ((HYBRID++))
     fi
 	done
-done < <(echo "$MEETINGS")
+done < <(echo "$MEETINGS" | jq -r -c '.[].formats')
 
+TOTALGROUPS=$(calculateTotalGroups "$MEETINGS")
 TOTAL_NO_FORMATS=$((TOTAL - NOFORMAT))
 TOTAL_INPERSON=$((INPERSON + TOTAL_NO_FORMATS))
 
@@ -110,4 +123,5 @@ echo -e "${TAL}In-person:${EC} ${GRN}$TOTAL_INPERSON${EC}"
 echo -e "${TAL}Hybrid:${EC} ${GRN}$HYBRID${EC}"
 echo -e "${TAL}Virtual:${EC} ${GRN}$VIRTUAL${EC}"
 echo -e "${WHT}Total Meetings:${EC} ${GRN}$TOTAL${EC}"
+echo -e "${WHT}Total Groups:${EC} ${GRN}$TOTALGROUPS${EC}"
 echo -e "${BLU}\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n${EC}"
