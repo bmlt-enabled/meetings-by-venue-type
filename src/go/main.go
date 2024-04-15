@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -31,6 +31,7 @@ type Totals struct {
 	Hybrid        int
 	TempVirtual   int
 	TotalMeetings int
+	TotalGroups   int
 }
 
 func main() {
@@ -47,6 +48,8 @@ func (totals Totals) PrintMethod() {
 	fmt.Printf(TotalColor, totals.Virtual)
 	fmt.Printf(InfoColor, "\nTotal Meetings: ")
 	fmt.Printf(TotalColor, totals.TotalMeetings)
+	fmt.Printf(InfoColor, "\nTotal Groups: ")
+	fmt.Printf(TotalColor, totals.TotalGroups)
 	pretty()
 }
 
@@ -202,7 +205,7 @@ func populate(total Totals) *Totals {
 	fmt.Printf(InfoColor, "\n\nTotal Meetings By Venue Type")
 	pretty()
 
-	meetingsData := getUrl(fmt.Sprintf("%sclient_interface/json/?switcher=GetSearchResults&services=%s&recursive=1&data_field_key=formats", rootUrl, serviceBodySelectedId))
+	meetingsData := getUrl(fmt.Sprintf("%sclient_interface/json/?switcher=GetSearchResults&services=%s&recursive=1&data_field_key=formats,meeting_name,service_body_bigint", rootUrl, serviceBodySelectedId))
 	var meetingSlice []map[string]string
 	if err := json.Unmarshal(meetingsData, &meetingSlice); err != nil {
 		panic(err)
@@ -213,6 +216,7 @@ func populate(total Totals) *Totals {
 	hybrid := 0
 	tempVirtual := 0
 	totalMeetings := 0
+	totalGroups := calculateTotalGroups(meetingSlice)
 
 	for _, element := range meetingSlice {
 		formats := strings.Split(element["formats"], ",")
@@ -237,9 +241,31 @@ func populate(total Totals) *Totals {
 		Hybrid:        hybrid,
 		TempVirtual:   tempVirtual,
 		TotalMeetings: totalMeetings,
+		TotalGroups:   totalGroups,
 	}
 
 	return &total
+}
+
+func calculateTotalGroups(meetings []map[string]string) int {
+	meetingMap := make(map[string]map[string]bool)
+
+	for _, meeting := range meetings {
+		serviceBodyID := meeting["service_body_bigint"]
+		meetingName := strings.ToLower(strings.TrimSpace(meeting["meeting_name"]))
+
+		if meetingMap[serviceBodyID] == nil {
+			meetingMap[serviceBodyID] = make(map[string]bool)
+		}
+		meetingMap[serviceBodyID][meetingName] = true
+	}
+
+	totalUniqueGroups := 0
+	for _, names := range meetingMap {
+		totalUniqueGroups += len(names)
+	}
+
+	return totalUniqueGroups
 }
 
 func contains(s []string, str string) bool {
@@ -280,7 +306,7 @@ func getUrl(url string) []byte {
 		defer res.Body.Close()
 	}
 
-	body, readErr := ioutil.ReadAll(res.Body)
+	body, readErr := io.ReadAll(res.Body)
 	if readErr != nil {
 		log.Fatal(readErr)
 	}
