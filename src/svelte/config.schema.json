@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "clusterConfig": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "organization": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "logoutUrl": { "type": "string" },
+        "contactEmail": { "type": "string", "format": "email" },
+        "classificationLabel": { "type": "string" },
+        "classificationText": { "type": "string" }
+      },
+      "required": ["name", "organization", "url", "contactEmail"]
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "category": { "type": "string" },
+          "description": { "type": "string" },
+          "developer": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "icon": { "type": "string" },
+          "installed": { "type": "boolean" }
+        },
+        "required": ["title", "icon", "installed"]
+      }
+    },
+    "apps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "category": { "type": "string" },
+          "description": { "type": "string" },
+          "developer": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "icon": { "type": "string" },
+          "installed": { "type": "boolean" }
+        },
+        "required": ["title", "category", "description", "url", "icon", "installed"]
+      }
+    }
+  },
+  "required": ["clusterConfig", "services", "apps"]
+}
