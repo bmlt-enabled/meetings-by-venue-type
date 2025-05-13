@@ -16,7 +16,7 @@ print BRIGHT_WHITE,   "\nGet Meetings By Venue-Type \n", RESET;
 print BRIGHT_MAGENTA, "\nRoot Servers: \n",              RESET;
 
 my $RootServersData = get_url(
-    'https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json'
+    'https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json'
 );
 
 my @RootServers = ();

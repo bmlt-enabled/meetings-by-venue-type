@@ -56,7 +56,7 @@ namespace dotnet
             Console.Write(string.Format(InfoColor, "\nGet Meetings By Venue-Type\n"));
             Console.Write(string.Format(NoticeColor, "\nRoot Servers:\n\n"));
 
-            string tomatoRoots = await GetUrlAsync("https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json");
+            string tomatoRoots = await GetUrlAsync("https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json");
             if (tomatoRoots == null)
             {
                 Console.WriteLine("Error: Unable to retrieve data from the URL.");

@@ -58,7 +58,7 @@ func populate(total Totals) *Totals {
 	fmt.Printf(NoticeColor, "\nRoot Servers:")
 	fmt.Println("")
 
-	tomatoRoots := getUrl("https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json")
+	tomatoRoots := getUrl("https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json")
 
 	var tomatoSlice []map[string]string
 	if err := json.Unmarshal(tomatoRoots, &tomatoSlice); err != nil {

@@ -25,7 +25,9 @@ echo -e "${WHT}\nGet Meetings By Venue-Type \n${EC}"
 
 echo -e "${PRPL}Root Servers: ${EC}"
 
-ROOT_SERVERS=$(curl -s "https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json" | jq -c 'sort_by(.name) | .[]')
+ROOT_SERVER_DATA=$(curl -s "https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json")
+
+ROOT_SERVERS=$(echo "$ROOT_SERVER_DATA" | jq -c 'sort_by(.name) | .[]')
 
 RC=1
 echo "$ROOT_SERVERS" | while read -r i; do
@@ -37,7 +39,7 @@ done
 echo -en "${PRPL}\nSelect a root server: ${EC}"
 read -r root_server_input
 ((selected_root_server_input += root_server_input - 1))
-SELECTED_ROOT_SERVER=$(curl -s "https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json" | jq -c --argjson SELECTION "$selected_root_server_input" 'sort_by(.name) | .[$SELECTION]')
+SELECTED_ROOT_SERVER=$(echo "$ROOT_SERVER_DATA" | jq -c --argjson SELECTION "$selected_root_server_input" 'sort_by(.name) | .[$SELECTION]')
 SELECTED_ROOT_SERVER_NAME=$(echo "$SELECTED_ROOT_SERVER" | jq -r '.name')
 SELECTED_ROOT_SERVER_URL=$(echo "$SELECTED_ROOT_SERVER" | jq -r '.rootURL')
 

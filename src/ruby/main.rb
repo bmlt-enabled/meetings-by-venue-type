@@ -62,7 +62,7 @@ def populate
   puts "\nRoot Servers:".magenta
 
   root_servers_data = get_url(
-    'https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json'
+    'https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json'
   ).sort_by { |k| k['name'] }
 
   rsc = 1

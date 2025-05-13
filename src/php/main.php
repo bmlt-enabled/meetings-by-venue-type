@@ -16,7 +16,7 @@ $total_meetings = 0;
 $region_service_bodies = [];
 $regions = [];
 
-$root_servers = json_decode(get("https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json"), true);
+$root_servers = json_decode(get("https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json"), true);
 
 // phpcs:disable PSR2.Methods.FunctionCallSignature.MultipleArguments
 usort(

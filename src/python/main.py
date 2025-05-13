@@ -96,7 +96,7 @@ def populate():
     print(f"{Bcolors.PRPL}Root Servers: {Bcolors.EC}")
 
     root_servers = sorted(
-        get_url("https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json"),
+        get_url("https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json"),
         key=lambda k: k['name'])
 
     rcount = 1

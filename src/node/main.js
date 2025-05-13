@@ -45,7 +45,7 @@ log(Color.WHT + "Get Meetings By Venue-Type", Color.EC, "\n");
 log(Color.PRPL + "Root Servers:", Color.EC);
 
 const tomatoServersData = await fetch(
-  "https://raw.githubusercontent.com/bmlt-enabled/tomato/master/rootServerList.json"
+  "https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json"
 );
 
 let tomatoRootServers = tomatoServersData.sort(function (a, b) {
