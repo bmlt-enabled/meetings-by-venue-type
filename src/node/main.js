@@ -45,7 +45,7 @@ log(Color.WHT + "Get Meetings By Venue-Type", Color.EC, "\n");
 log(Color.PRPL + "Root Servers:", Color.EC);
 
 const tomatoServersData = await fetch(
-  "https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json"
+  "https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/serverList.json"
 );
 
 let tomatoRootServers = tomatoServersData.sort(function (a, b) {
@@ -73,7 +73,7 @@ if (parseInt(rootServerSelected) > tomatoRootServers.length) {
   process.exit(0);
 }
 let root_server_selected_url =
-  tomatoRootServers[rootServerSelected - 1]["rootURL"];
+  tomatoRootServers[rootServerSelected - 1]["url"];
 let root_server_selected_name =
   tomatoRootServers[rootServerSelected - 1]["name"];
 log(

@@ -62,7 +62,7 @@ def populate
   puts "\nRoot Servers:".magenta
 
   root_servers_data = get_url(
-    'https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json'
+    'https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/serverList.json'
   ).sort_by { |k| k['name'] }
 
   rsc = 1
@@ -80,7 +80,7 @@ def populate
   end
 
   rs_name = root_servers_data[rs_input.to_i - 1]['name']
-  rs_url = root_servers_data[rs_input.to_i - 1]['rootURL']
+  rs_url = root_servers_data[rs_input.to_i - 1]['url']
 
   puts "\n#{'You selected: '.magenta}\033[1;31m#{rs_input} [#{rs_name}]\e[0m"
   puts "\nRegions:".magenta

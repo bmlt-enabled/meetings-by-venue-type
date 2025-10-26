@@ -16,7 +16,7 @@ $total_meetings = 0;
 $region_service_bodies = [];
 $regions = [];
 
-$root_servers = json_decode(get("https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json"), true);
+$root_servers = json_decode(get("https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/serverList.json"), true);
 
 // phpcs:disable PSR2.Methods.FunctionCallSignature.MultipleArguments
 usort(
@@ -38,7 +38,7 @@ foreach ($root_servers as $root_server) {
 echo colors("\nSelect a root server: ", "35");
 $root_server_selected = rtrim(fgets(STDIN));
 $root_server_selected_id = $root_servers[$root_server_selected-1]["id"];
-$root_server_selected_url = $root_servers[$root_server_selected-1]["rootURL"];
+$root_server_selected_url = $root_servers[$root_server_selected-1]["url"];
 echo colors("\nYou selected: ", "35") . colors($root_server_selected . " [" . $root_servers[$root_server_selected-1]["name"] . "]\n", "31");
 
 $service_bodies = json_decode(get($root_server_selected_url . "client_interface/json/?switcher=GetServiceBodies"), true);

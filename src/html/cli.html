@@ -267,7 +267,7 @@
     }
 
     async function loadTomato() {
-        const tomatoServersData = await fetch('https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json').then(function (response) {
+        const tomatoServersData = await fetch('https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/serverList.json').then(function (response) {
             return response.json();
         })
         tomatoServersData.sort(function (a, b) {
@@ -303,7 +303,7 @@
     async function processSelectedRootServer(selectionNumber, selectedRootServer) {
         document.getElementById('selectedRootLabel').innerHTML = "You selected: "
         document.getElementById('selectedRoot').innerHTML = +selectionNumber + " [" + selectedRootServer.name + "]"
-        let regionsData = await fetchJsonp(selectedRootServer.rootURL + 'client_interface/jsonp/?switcher=GetServiceBodies').then(function (response) {
+        let regionsData = await fetchJsonp(selectedRootServer.url + 'client_interface/jsonp/?switcher=GetServiceBodies').then(function (response) {
             return response.json();
         })
         regionsData.sort(function (a, b) {
@@ -335,7 +335,7 @@
         regionInput.onkeydown = function (event) {
             if (event.key === 'Enter') {
                 document.getElementById("sr-caret").style.display = "none";
-                processSelectedRegion1(regionInput.value, regions[regionInput.value - 1], regionsData, selectedRootServer.rootURL)
+                processSelectedRegion1(regionInput.value, regions[regionInput.value - 1], regionsData, selectedRootServer.url)
             }
         }
     }

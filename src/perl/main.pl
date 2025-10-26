@@ -16,7 +16,7 @@ print BRIGHT_WHITE,   "\nGet Meetings By Venue-Type \n", RESET;
 print BRIGHT_MAGENTA, "\nRoot Servers: \n",              RESET;
 
 my $RootServersData = get_url(
-    'https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json'
+    'https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/serverList.json'
 );
 
 my @RootServers = ();
@@ -40,7 +40,7 @@ if ( $RootServerInput > $RootLength ) {
 }
 
 my $RootServerName = $RootServers[ $RootServerInput - 1 ]->{name};
-my $RootServerUrl  = $RootServers[ $RootServerInput - 1 ]->{rootURL};
+my $RootServerUrl  = $RootServers[ $RootServerInput - 1 ]->{url};
 print BRIGHT_MAGENTA, "\nYou selected: ", RESET, BRIGHT_RED,
     "$RootServerInput [$RootServerName]\n", RESET;
 

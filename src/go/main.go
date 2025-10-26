@@ -58,7 +58,7 @@ func populate(total Totals) *Totals {
 	fmt.Printf(NoticeColor, "\nRoot Servers:")
 	fmt.Println("")
 
-	tomatoRoots := getUrl("https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json")
+	tomatoRoots := getUrl("https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/serverList.json")
 
 	var tomatoSlice []map[string]string
 	if err := json.Unmarshal(tomatoRoots, &tomatoSlice); err != nil {
@@ -102,9 +102,9 @@ func populate(total Totals) *Totals {
 	fmt.Printf(ErrorColor, tomatoSlice[tomatoSelectionIndex-1]["name"])
 	fmt.Printf(ErrorColor, "]")
 
-	rootUrl := tomatoSlice[tomatoSelectionIndex-1]["rootURL"]
+	url := tomatoSlice[tomatoSelectionIndex-1]["url"]
 
-	serviceBodiesData := getUrl(fmt.Sprintf("%sclient_interface/json/?switcher=GetServiceBodies", rootUrl))
+	serviceBodiesData := getUrl(fmt.Sprintf("%sclient_interface/json/?switcher=GetServiceBodies", url))
 
 	var regionSlice []map[string]string
 	if err := json.Unmarshal(serviceBodiesData, &regionSlice); err != nil {
@@ -205,7 +205,7 @@ func populate(total Totals) *Totals {
 	fmt.Printf(InfoColor, "\n\nTotal Meetings By Venue Type")
 	pretty()
 
-	meetingsData := getUrl(fmt.Sprintf("%sclient_interface/json/?switcher=GetSearchResults&services=%s&recursive=1&data_field_key=formats,meeting_name,service_body_bigint", rootUrl, serviceBodySelectedId))
+	meetingsData := getUrl(fmt.Sprintf("%sclient_interface/json/?switcher=GetSearchResults&services=%s&recursive=1&data_field_key=formats,meeting_name,service_body_bigint", url, serviceBodySelectedId))
 	var meetingSlice []map[string]string
 	if err := json.Unmarshal(meetingsData, &meetingSlice); err != nil {
 		panic(err)

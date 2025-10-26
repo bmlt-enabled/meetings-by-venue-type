@@ -223,7 +223,7 @@
     }
 
     async function loadTomato() {
-        const tomatoServersData = await fetch('https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json').then(function (response) {
+        const tomatoServersData = await fetch('https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/serverList.json').then(function (response) {
             return response.json();
         })
         tomatoServersData.sort(function (a, b) {
@@ -245,7 +245,7 @@
         for (let i = 0; i < tomatoServersData.length; i++) {
             option = document.createElement('option');
             option.text = tomatoServersData[i].name;
-            option.value = tomatoServersData[i].rootURL;
+            option.value = tomatoServersData[i].url;
             dropdown.add(option);
         }
     }

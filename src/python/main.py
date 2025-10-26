@@ -113,7 +113,7 @@ def populate():
         sys.exit(0)
     selected_root_server = root_servers[int(root_server_input) - 1]
     selected_root_server_name = selected_root_server['name']
-    selected_root_server_url = selected_root_server['rootURL']
+    selected_root_server_url = selected_root_server['url']
     print(f"\n{Bcolors.PRPL}You selected: {Bcolors.EC}", end='')
 
     print(f"{Bcolors.RED}{root_server_input} [{selected_root_server_name}]{Bcolors.EC}")

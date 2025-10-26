@@ -56,7 +56,7 @@ namespace dotnet
             Console.Write(string.Format(InfoColor, "\nGet Meetings By Venue-Type\n"));
             Console.Write(string.Format(NoticeColor, "\nRoot Servers:\n\n"));
 
-            string tomatoRoots = await GetUrlAsync("https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/rootServerList.json");
+            string tomatoRoots = await GetUrlAsync("https://raw.githubusercontent.com/bmlt-enabled/aggregator/main/serverList.json");
             if (tomatoRoots == null)
             {
                 Console.WriteLine("Error: Unable to retrieve data from the URL.");
@@ -94,9 +94,9 @@ namespace dotnet
             Console.Write(string.Format(ErrorColor, tomatoSlice[tomatoSelectionIndex - 1]["name"]));
             Console.Write(string.Format(ErrorColor, "]"));
 
-            string rootUrl = tomatoSlice[tomatoSelectionIndex - 1]["rootURL"];
+            string url = tomatoSlice[tomatoSelectionIndex - 1]["url"];
 
-            string serviceBodiesData = await GetUrlAsync($"{rootUrl}client_interface/json/?switcher=GetServiceBodies");
+            string serviceBodiesData = await GetUrlAsync($"{url}client_interface/json/?switcher=GetServiceBodies");
 
             List<Dictionary<string, string>> regionSlice = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(serviceBodiesData);
 
@@ -180,7 +180,7 @@ namespace dotnet
             Console.Write(string.Format(InfoColor, "\n\nTotal Meetings By Venue Type"));
             Pretty();
 
-            string meetingsData = await GetUrlAsync($"{rootUrl}client_interface/json/?switcher=GetSearchResults&services={serviceBodySelectedId}&recursive=1&data_field_key=formats");
+            string meetingsData = await GetUrlAsync($"{url}client_interface/json/?switcher=GetSearchResults&services={serviceBodySelectedId}&recursive=1&data_field_key=formats");
 
             List<Dictionary<string, string>> meetingSlice = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(meetingsData);
 
