@@ -97,7 +97,7 @@ $service_body_selected = rtrim(fgets(STDIN));
 $service_body_selected_id = $region_service_bodies[$service_body_selected-1]["id"];
 echo colors("\nYou selected: ", "35") . colors($service_body_selected . " [" . $region_service_bodies[$service_body_selected-1]["name"] . " (" .$service_body_selected_id. ")]\n", "31");
 
-$meetings = json_decode(get($root_server_selected_url . "client_interface/json/?switcher=GetSearchResults&services=$service_body_selected_id&recursive=1&data_field_key=formats"), true);
+$meetings = json_decode(get($root_server_selected_url . "client_interface/json/?switcher=GetSearchResults&services=$service_body_selected_id&recursive=1&data_field_key=formats,meeting_name,service_body_bigint"), true);
 
 foreach ($meetings as $meeting) {
     $formats = explode(",", $meeting['formats']);
@@ -116,6 +116,8 @@ foreach ($meetings as $meeting) {
     $total_meetings++;
 }
 
+$total_groups = calculateTotalGroups($meetings);
+
 echo colors("\nTotal Meetings By Venue Type\n", "38");
 echo colors(pretty(), "34") . "\n";
 echo colors("In-person: ", "36") . colors($inperson, "32") . "\n";
@@ -123,8 +125,32 @@ echo colors("Hybrid: ", "36") . colors($hybrid, "32") . "\n";
 echo colors("Virtual: ", "36") . colors($virtual, "32") . "\n";
 // echo colors("Virtual (temporarily replacing an in-person): ", "36"). colors($tempvirtual, "32") . "\n\n";
 echo colors("Total Meetings: ", "37") . colors($total_meetings, "32") . "\n";
+echo colors("Total Groups: ", "37") . colors($total_groups, "32") . "\n";
 echo colors(pretty(), "34");
 echo "\n";
+
+/**
+ * Implements calculateTotalGroups.
+ */
+function calculateTotalGroups($meetings)
+{
+    $meeting_map = [];
+    foreach ($meetings as $meeting) {
+        $service_body_id = $meeting["service_body_bigint"];
+        $meeting_name = strtolower(trim($meeting["meeting_name"]));
+        if (!isset($meeting_map[$service_body_id])) {
+            $meeting_map[$service_body_id] = [];
+        }
+        $meeting_map[$service_body_id][$meeting_name] = true;
+    }
+
+    $total_groups = 0;
+    foreach ($meeting_map as $names) {
+        $total_groups += count($names);
+    }
+
+    return $total_groups;
+}
 
 /**
  * Implements pretty printing.
