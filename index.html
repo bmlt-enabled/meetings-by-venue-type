@@ -3,458 +3,650 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-    <title>meetings-by-venue-type</title>
+    <title>Meetings by Venue Type</title>
     <style>
-        body {
-            background-color: #000000;
+        :root {
+            --bg:         #0a0a09;
+            --surface:    #131311;
+            --surface-2:  #1a1a17;
+            --border:     #252520;
+            --border-hi:  #383830;
+            --text:       #ddd8cb;
+            --text-muted: #6b6760;
+            --text-dim:   #3a3832;
+            --amber:      #c97d1a;
+            --amber-hi:   #e8961f;
+            --amber-dim:  #2e1c06;
+            --green:      #4aaa74;
+            --blue:       #4a8bbf;
+            --white:      #f5f0e8;
         }
 
-        option {
-            color: #fffc72;
-            background-color: #000000;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', 'Lucida Console', 'Menlo', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 48px 20px 64px;
+            position: relative;
+        }
+
+        /* Grain overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        header, main, footer { position: relative; z-index: 1; }
+
+        /* ─── Header ─── */
+        header {
+            width: 100%;
+            max-width: 660px;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tag {
+            font-size: 9px;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--amber);
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 26px;
+            font-weight: normal;
+            color: var(--white);
+            line-height: 1.25;
+        }
+
+        .subtitle {
+            margin-top: 6px;
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
+            line-height: 1.6;
+        }
+
+        /* ─── Main ─── */
+        main {
+            width: 100%;
+            max-width: 660px;
+        }
+
+        /* ─── Steps ─── */
+        .step {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            margin-bottom: 3px;
+            transition: border-color 0.25s, opacity 0.25s;
+        }
+
+        .step.active  { border-color: var(--amber); }
+        .step.done    { border-color: var(--border); opacity: 0.65; }
+        .step.hidden  { display: none; }
+
+        .step-head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            min-height: 54px;
+        }
+
+        .step-num {
+            width: 26px;
+            height: 26px;
+            border: 1px solid var(--amber);
+            color: var(--amber);
+            font-size: 10px;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .step.done .step-num {
+            background: var(--amber-dim);
+        }
+
+        .step-label {
+            font-size: 10px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+
+        .step.active .step-label { color: var(--text); }
+
+        .step-chosen {
+            margin-left: auto;
+            font-size: 11px;
+            color: var(--amber-hi);
+            max-width: 220px;
+            text-align: right;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .step-body {
+            padding: 0 18px 18px 58px;
+            display: none;
+            animation: fadeSlide 0.2s ease both;
+        }
+
+        .step.active .step-body { display: block; }
+
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ─── Select ─── */
+        .sel-wrap {
+            position: relative;
+        }
+
+        .sel-wrap::after {
+            content: '▾';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--amber);
+            font-size: 13px;
+            pointer-events: none;
         }
 
         select {
-            color: #fffc72;
-            background-color: #000000;
+            width: 100%;
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border-hi);
+            padding: 9px 32px 9px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.15s;
         }
 
-        .mag {
-            color: #ff77fc;
+        select:hover  { border-color: var(--amber); }
+        select:focus  { border-color: var(--amber-hi); }
+        select option { background: #1a1a17; color: var(--text); }
+
+        /* ─── Loading spinner ─── */
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 0;
         }
 
-        .red {
-            color: #ff6e68;
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 1px solid var(--border-hi);
+            border-top-color: var(--amber);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
 
-        .wht {
-            color: #ffffff;
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-text {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
         }
 
-        .blu {
-            color: #6771fb;
-        }
-
-        .tal {
-            color: #5cfdff;
-        }
-
-        .grn {
-            color: #5cfa72;
-        }
-
-        .container {
-            width: 700px;
-            height: 600px;
-            border: 2px solid #000;
-        }
-
-        #content {
-            width: 95%;
-            margin: 10px auto;
-            border: 2px solid #000;
-        }
-
-        .inline {
-            display: inline
-        }
-
-        #regionsDiv {
+        /* ─── Results ─── */
+        #results {
+            margin-top: 28px;
             display: none;
+            animation: fadeSlide 0.3s ease both;
         }
 
-        #serviceBodiesDiv {
-            display: none;
+        #results.visible { display: block; }
+
+        .res-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
         }
 
-        #tallyDiv {
-            display: none;
+        .res-title {
+            font-family: Georgia, serif;
+            font-size: 15px;
+            font-weight: normal;
+            color: var(--white);
+        }
+
+        .res-tag {
+            font-size: 9px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        /* Venue stat cards */
+        .venue-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3px;
+            margin-bottom: 3px;
+        }
+
+        .vcard {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 20px 16px 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vcard::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+        }
+
+        .vcard.ip::after  { background: var(--green); }
+        .vcard.hy::after  { background: var(--blue); }
+        .vcard.vt::after  { background: var(--amber); }
+
+        .vcard-label {
+            font-size: 9px;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .vcard-num {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 42px;
+            line-height: 1;
+            font-weight: normal;
+        }
+
+        .vcard.ip .vcard-num { color: var(--green); }
+        .vcard.hy .vcard-num { color: var(--blue); }
+        .vcard.vt .vcard-num { color: var(--amber-hi); }
+
+        /* Totals */
+        .totals {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3px;
+        }
+
+        .tcard {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .tcard-label {
+            font-size: 9px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .tcard-num {
+            font-family: Georgia, serif;
+            font-size: 26px;
+            font-weight: normal;
+            color: var(--white);
+        }
+
+        /* ─── Footer ─── */
+        footer {
+            width: 100%;
+            max-width: 660px;
+            margin-top: 48px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+            font-size: 9px;
+            color: var(--text-dim);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
         }
     </style>
 </head>
 
-<body onload="loadTomato()">
-<div class="container">
-    <div id="content">
-        <div class="wht" id="title">Get Meetings By Venue-Type</div>
-        <br/>
-        <label class="mag" for="tomato-dropdown">Root Servers:&nbsp;
-            <select id="tomato-dropdown" name="tomato-roots" onChange="rootSelected()"></select>
-        </label>
+<body onload="init()">
 
-        <br/>
-        <br/>
+<header>
+    <div class="tag">BMLT &mdash; Basic Meeting List Toolbox</div>
+    <h1>Meetings by Venue Type</h1>
+    <p class="subtitle">Choose a root server, then a region and service body<br>to retrieve a venue-type breakdown of meetings.</p>
+</header>
 
-        <div class="mag inline" id="selectedRootLabel"></div>
-        <div class="red inline" id="selectedRoot"></div>
+<main>
 
-        <br/>
-        <br/>
-
-        <div id="regionsDiv">
-            <label class="mag" for="regions-dropdown">Regions:&nbsp;
-                <select id="regions-dropdown" name="regions" onChange="regionSelected()"></select>
-            </label>
+    <!-- Step 1 -->
+    <div class="step active" id="step1">
+        <div class="step-head">
+            <div class="step-num">01</div>
+            <div class="step-label">Root Server</div>
+            <div class="step-chosen" id="chosen1"></div>
         </div>
-
-        <br/>
-
-        <div class="mag inline" id="selectedRootServerLabel"></div>
-        <div class="red inline" id="selectedRootServer"></div>
-
-        <br/>
-        <br/>
-
-        <div id="serviceBodiesDiv">
-            <label class="mag" for="service-bodies-dropdown">Service Bodies:&nbsp;
-                <select id="service-bodies-dropdown" name="service-bodies" onChange="serviceBodiesSelected()"></select>
-            </label>
-        </div>
-
-        <br/>
-
-        <div class="mag inline" id="selectedServiceBodyLabel"></div>
-        <div class="red inline" id="selectedServiceBody"></div>
-
-        <br/>
-        <br/>
-
-        <div id="tallyDiv">
-            <div class="wht">Total Meetings By Venue Type</div>
-            <br/>
-            <div class="blu">-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=</div>
-            <br/>
-            <div class="tal inline">In-Person: &nbsp;</div>
-            <div class="grn inline" id="inPerson"></div>
-            <br/>
-            <div class="tal inline">Hybrid: &nbsp;</div>
-            <div class="grn inline" id="hybrid"></div>
-            <br/>
-            <div class="tal inline">Virtual: &nbsp;</div>
-            <div class="grn inline" id="virtual"></div>
-            <br/>
-            <div class="wht inline">Total Meetings: &nbsp;</div>
-            <div class="grn inline" id="totalMeetings"></div>
-            <br/>
-            <div class="wht inline">Total Groups: &nbsp;</div>
-            <div class="grn inline" id="totalGroups"></div>
-            <br/>
-            <br/>
-            <div class="blu">-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=</div>
+        <div class="step-body">
+            <div class="loading" id="root-loading">
+                <div class="spinner"></div>
+                <span class="loading-text">Fetching server list&hellip;</span>
+            </div>
+            <div class="sel-wrap" id="root-sel-wrap" style="display:none">
+                <select id="tomato-dropdown" onChange="rootSelected()"></select>
+            </div>
         </div>
     </div>
-</div>
 
-<script type="application/javascript">
-    function removeScript(scriptId) {
-        let script = document.getElementById(scriptId);
-        if (script) {
-            document.getElementsByTagName('head')[0].removeChild(script);
-        }
+    <!-- Step 2 -->
+    <div class="step hidden" id="step2">
+        <div class="step-head">
+            <div class="step-num">02</div>
+            <div class="step-label">Region</div>
+            <div class="step-chosen" id="chosen2"></div>
+        </div>
+        <div class="step-body">
+            <div class="sel-wrap">
+                <select id="regions-dropdown" onChange="regionSelected()"></select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step hidden" id="step3">
+        <div class="step-head">
+            <div class="step-num">03</div>
+            <div class="step-label">Service Body</div>
+            <div class="step-chosen" id="chosen3"></div>
+        </div>
+        <div class="step-body">
+            <div class="sel-wrap">
+                <select id="service-bodies-dropdown" onChange="serviceBodiesSelected()"></select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results">
+        <div class="res-head">
+            <div class="res-title">Distribution Report</div>
+            <div class="res-tag">By Venue Type</div>
+        </div>
+        <div class="venue-grid">
+            <div class="vcard ip">
+                <div class="vcard-label">In-Person</div>
+                <div class="vcard-num" id="inPerson">—</div>
+            </div>
+            <div class="vcard hy">
+                <div class="vcard-label">Hybrid</div>
+                <div class="vcard-num" id="hybrid">—</div>
+            </div>
+            <div class="vcard vt">
+                <div class="vcard-label">Virtual</div>
+                <div class="vcard-num" id="virtual">—</div>
+            </div>
+        </div>
+        <div class="totals">
+            <div class="tcard">
+                <span class="tcard-label">Total Meetings</span>
+                <span class="tcard-num" id="totalMeetings">—</span>
+            </div>
+            <div class="tcard">
+                <span class="tcard-label">Total Groups</span>
+                <span class="tcard-num" id="totalGroups">—</span>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer>
+    <span>BMLT-Enabled</span>
+    <span id="ts"></span>
+</footer>
+
+<script>
+    document.getElementById('ts').textContent = new Date().toISOString().slice(0, 10);
+
+    /* ── JSONP helper ── */
+    function removeScript(id) {
+        const s = document.getElementById(id);
+        if (s) document.head.removeChild(s);
     }
 
-    function fetchJsonp(_url, options) {
-        if (!options) {
-            options = {};
-        }
-        // to avoid param reassign
-        let url = _url;
-        let timeout = 300000;
-        let jsonpCallback = 'callback';
+    function fetchJsonp(url, opts = {}) {
+        return new Promise((resolve, reject) => {
+            const cb  = 'jsonp_' + Date.now() + '_' + Math.ceil(Math.random() * 1e5);
+            const sid = 'callback_' + cb;
 
-        let timeoutId;
-
-        return new Promise(function (resolve, reject) {
-            let callbackFunction = 'jsonp_' + Date.now().toString() + '_' + Math.ceil(Math.random() * 100000).toString();
-            let scriptId = jsonpCallback + '_' + callbackFunction;
-
-            window[callbackFunction] = function (response) {
-                resolve({
-                    ok: true,
-                    // keep consistent with fetch API
-                    json: function () {
-                        return Promise.resolve(response);
-                    },
-                });
-
-                if (timeoutId) clearTimeout(timeoutId);
-
-                removeScript(scriptId);
-
-                delete window[callbackFunction];
+            window[cb] = res => {
+                resolve({ ok: true, json: () => Promise.resolve(res) });
+                clearTimeout(tid);
+                removeScript(sid);
+                delete window[cb];
             };
 
-            // Check if the user set their own params, and if not add a ? to start a list of params
-            url += (url.indexOf('?') === -1) ? '?' : '&';
+            const sep = url.includes('?') ? '&' : '?';
+            const el  = document.createElement('script');
+            el.id  = sid;
+            el.src = url + sep + 'callback=' + cb;
+            if (opts.charset)      el.charset      = opts.charset;
+            if (opts.nonce)        el.nonce        = opts.nonce;
+            if (opts.referrerPolicy) el.referrerPolicy = opts.referrerPolicy;
 
-            let jsonpScript = document.createElement('script');
-            jsonpScript.setAttribute('src', url + jsonpCallback + '=' + callbackFunction);
-            if (options.charset) {
-                jsonpScript.setAttribute('charset', options.charset);
-            }
-            if (options.nonce) {
-                jsonpScript.setAttribute('nonce', options.nonce);
-            }
-            if (options.referrerPolicy) {
-                jsonpScript.setAttribute('referrerPolicy', options.referrerPolicy);
-            }
-            jsonpScript.id = scriptId;
-            document.getElementsByTagName('head')[0].appendChild(jsonpScript);
-
-            timeoutId = setTimeout(function () {
-                reject(new Error('JSONP request to ' + _url + ' timed out'));
-
-                delete window[callbackFunction];
-                removeScript(scriptId);
-                window[callbackFunction] = function () {
-                    delete window[callbackFunction];
-                };
-            }, timeout);
-
-            // Caught if got 404/500
-            jsonpScript.onerror = function () {
-                reject(new Error('JSONP request to ' + _url + ' failed'));
-
-                delete window[callbackFunction];
-                removeScript(scriptId);
-                if (timeoutId) clearTimeout(timeoutId);
+            el.onerror = () => {
+                reject(new Error('JSONP failed: ' + url));
+                delete window[cb];
+                removeScript(sid);
+                clearTimeout(tid);
             };
+
+            document.head.appendChild(el);
+
+            const tid = setTimeout(() => {
+                reject(new Error('JSONP timeout: ' + url));
+                delete window[cb];
+                removeScript(sid);
+                window[cb] = () => { delete window[cb]; };
+            }, 300000);
         });
     }
 
-    async function loadTomato() {
-        const tomatoServersData = await fetch('https://raw.githubusercontent.com/bmlt-enabled/aggregator/refs/heads/main/serverList.json').then(function (response) {
-            return response.json();
-        })
-        tomatoServersData.sort(function (a, b) {
-            a = a.name.toLowerCase();
-            b = b.name.toLowerCase();
+    /* ── Step helpers ── */
+    function showStep(id) {
+        const el = document.getElementById(id);
+        el.classList.remove('hidden');
+        el.classList.add('active');
+    }
 
-            return a < b ? -1 : a > b ? 1 : 0;
+    function doneStep(id, label) {
+        const el = document.getElementById(id);
+        el.classList.remove('active');
+        el.classList.add('done');
+    }
+
+    function buildDropdown(sel, items, placeholder, valFn, textFn) {
+        sel.length = 0;
+        const def = document.createElement('option');
+        def.text = placeholder;
+        sel.add(def);
+        sel.selectedIndex = 0;
+        items.forEach(item => {
+            const o = document.createElement('option');
+            o.text  = textFn(item);
+            o.value = valFn(item);
+            sel.add(o);
         });
-        let dropdown = document.getElementById('tomato-dropdown');
-        dropdown.length = 0;
+    }
 
-        let defaultOption = document.createElement('option');
-        defaultOption.text = 'Select a root server:';
+    function sortBy(arr, key) {
+        return arr.slice().sort((a, b) => {
+            const x = a[key].toLowerCase(), y = b[key].toLowerCase();
+            return x < y ? -1 : x > y ? 1 : 0;
+        });
+    }
 
-        dropdown.add(defaultOption);
-        dropdown.selectedIndex = 0;
+    /* ── Step 1: Load root servers ── */
+    async function init() {
+        const data = await fetch('https://raw.githubusercontent.com/bmlt-enabled/aggregator/refs/heads/main/serverList.json')
+            .then(r => r.json());
 
-        let option;
-        for (let i = 0; i < tomatoServersData.length; i++) {
-            option = document.createElement('option');
-            option.text = tomatoServersData[i].name;
-            option.value = tomatoServersData[i].url;
-            dropdown.add(option);
-        }
+        buildDropdown(
+            document.getElementById('tomato-dropdown'),
+            sortBy(data, 'name'),
+            'Select a root server\u2026',
+            d => d.url,
+            d => d.name
+        );
+
+        document.getElementById('root-loading').style.display = 'none';
+        document.getElementById('root-sel-wrap').style.display = 'block';
     }
 
     function rootSelected() {
-        let select = document.getElementById('tomato-dropdown');
-        let option = select.options[select.selectedIndex];
-        let rootServerId = select.selectedIndex
-        let rootServerUrl = option.value
-        let rootServerName = option.text
-        processSelectedRootServer(rootServerId, rootServerUrl, rootServerName)
+        const sel = document.getElementById('tomato-dropdown');
+        if (sel.selectedIndex === 0) return;
+        const opt = sel.options[sel.selectedIndex];
+        processSelectedRootServer(opt.value, opt.text);
     }
 
-    async function processSelectedRootServer(rootServerId, rootServerUrl, rootServerName) {
-        document.getElementById('selectedRootLabel').innerHTML = "You selected: "
-        document.getElementById('selectedRoot').innerHTML = rootServerId + " [" + rootServerName + "]"
-        let regionsData = await fetchJsonp(rootServerUrl + 'client_interface/jsonp/?switcher=GetServiceBodies').then(function (response) {
-            return response.json();
-        })
-        regionsData.sort(function (a, b) {
-            a = a.name.toLowerCase();
-            b = b.name.toLowerCase();
+    async function processSelectedRootServer(rootUrl, rootName) {
+        doneStep('step1');
+        document.getElementById('chosen1').textContent = rootName;
 
-            return a < b ? -1 : a > b ? 1 : 0;
-        });
+        const data    = await fetchJsonp(rootUrl + 'client_interface/jsonp/?switcher=GetServiceBodies').then(r => r.json());
+        const regions = sortBy(data.filter(r => r.type.includes('RS')), 'name');
 
-        let regions = [];
-        for (const region of regionsData) {
-            if (region.type.includes("RS")) {
-                regions.push(region);
-            }
-        }
+        buildDropdown(
+            document.getElementById('regions-dropdown'),
+            regions,
+            'Select a region\u2026',
+            r => rootUrl + '||' + r.id,
+            r => r.name
+        );
 
-        let regionDropdown = document.getElementById('regions-dropdown');
-        regionDropdown.length = 0;
-
-        let defaultRegionOption = document.createElement('option');
-        defaultRegionOption.text = 'Select a region:';
-
-        regionDropdown.add(defaultRegionOption);
-        regionDropdown.selectedIndex = 0;
-
-        let regionOption;
-        for (let i = 0; i < regions.length; i++) {
-            regionOption = document.createElement('option');
-            regionOption.text = regions[i].name;
-            regionOption.value = rootServerUrl + "||" + regions[i].id;
-            regionDropdown.add(regionOption);
-        }
-        document.getElementById("regionsDiv").style.display = "block";
+        showStep('step2');
     }
 
     function regionSelected() {
-        let regionSelect = document.getElementById('regions-dropdown');
-        let regionOption = regionSelect.options[regionSelect.selectedIndex];
-        let selectionId = regionSelect.selectedIndex
-        let regionUrl = regionOption.value
-        let regionName = regionOption.text
-        processSelectedRegion(selectionId, regionUrl, regionName)
+        const sel = document.getElementById('regions-dropdown');
+        if (sel.selectedIndex === 0) return;
+        const opt = sel.options[sel.selectedIndex];
+        processSelectedRegion(opt.value, opt.text);
     }
 
+    async function processSelectedRegion(regionUrl, regionName) {
+        doneStep('step2');
+        document.getElementById('chosen2').textContent = regionName;
 
-    async function processSelectedRegion(selectionId, regionUrl, regionName) {
-        const regionInfo = regionUrl.split("||");
-        let rootServerUrl = regionInfo[0];
-        let regionSelectedId = regionInfo[1];
-        document.getElementById('selectedRootServerLabel').innerHTML = "You selected: "
-        document.getElementById('selectedRootServer').innerHTML = selectionId + " [" + regionName + " (" + regionSelectedId + ")]"
+        const [rootUrl, regionId] = regionUrl.split('||');
+        const data = await fetchJsonp(rootUrl + 'client_interface/jsonp/?switcher=GetServiceBodies').then(r => r.json());
+        const bodies = sortBy(
+            data.filter(sb => sb.parent_id === regionId || sb.id === regionId),
+            'name'
+        );
 
+        buildDropdown(
+            document.getElementById('service-bodies-dropdown'),
+            bodies,
+            'Select a service body\u2026',
+            sb => rootUrl + '||' + sb.id,
+            sb => sb.name
+        );
 
-        let serviceBodiesData = await fetchJsonp(rootServerUrl + 'client_interface/jsonp/?switcher=GetServiceBodies').then(function (response) {
-            return response.json();
-        })
-        serviceBodiesData.sort(function (a, b) {
-            a = a.name.toLowerCase();
-            b = b.name.toLowerCase();
-
-            return a < b ? -1 : a > b ? 1 : 0;
-        });
-
-        let serviceBodies = [];
-        for (const serviceBody of serviceBodiesData) {
-            if (serviceBody.parent_id === regionSelectedId || serviceBody.id === regionSelectedId) {
-                serviceBodies.push(serviceBody);
-            }
-        }
-
-
-        let serviceBodiesDropdown = document.getElementById('service-bodies-dropdown');
-        serviceBodiesDropdown.length = 0;
-
-        let defaultServiceBodiesOption = document.createElement('option');
-        defaultServiceBodiesOption.text = 'Select a service body:';
-
-        serviceBodiesDropdown.add(defaultServiceBodiesOption);
-        serviceBodiesDropdown.selectedIndex = 0;
-
-        let serviceBodiesOption;
-        for (let i = 0; i < serviceBodies.length; i++) {
-            serviceBodiesOption = document.createElement('option');
-            serviceBodiesOption.text = serviceBodies[i].name;
-            serviceBodiesOption.value = rootServerUrl + "||" + serviceBodies[i].id;
-            serviceBodiesDropdown.add(serviceBodiesOption);
-        }
-        document.getElementById("serviceBodiesDiv").style.display = "block";
+        showStep('step3');
     }
 
     function serviceBodiesSelected() {
-        let serviceBodiesSelect = document.getElementById('service-bodies-dropdown');
-        let serviceBodiesOption = serviceBodiesSelect.options[serviceBodiesSelect.selectedIndex];
-        let selectionId = serviceBodiesSelect.selectedIndex
-        let regionUrl = serviceBodiesOption.value
-        let serviceBodyName = serviceBodiesOption.text
-        processSelectedServiceBodies(selectionId, regionUrl, serviceBodyName)
+        const sel = document.getElementById('service-bodies-dropdown');
+        if (sel.selectedIndex === 0) return;
+        const opt = sel.options[sel.selectedIndex];
+        processSelectedServiceBodies(opt.value, opt.text);
     }
 
+    async function processSelectedServiceBodies(sbUrl, sbName) {
+        doneStep('step3');
+        document.getElementById('chosen3').textContent = sbName;
+
+        const [rootUrl, sbId] = sbUrl.split('||');
+        const data = await fetchJsonp(
+            rootUrl + 'client_interface/jsonp/?switcher=GetSearchResults&services=' + sbId +
+            '&recursive=1&data_field_key=formats,meeting_name,service_body_bigint'
+        ).then(r => r.json());
+
+        tally(data);
+    }
+
+    /* ── Tally ── */
     function calculateTotalGroups(data) {
-        const meetingMap = {};
-
-        data.forEach(meeting => {
-            const { service_body_bigint: serviceBodyId, meeting_name: meetingName } = meeting;
-            const normalizedMeetingName = meetingName.trim().toLowerCase();
-            if (!meetingMap[serviceBodyId]) {
-                meetingMap[serviceBodyId] = new Set();
-            }
-            meetingMap[serviceBodyId].add(normalizedMeetingName);
+        const map = {};
+        data.forEach(({ service_body_bigint: sbId, meeting_name: name }) => {
+            if (!map[sbId]) map[sbId] = new Set();
+            map[sbId].add(name.trim().toLowerCase());
         });
-
-        let totalGroups = 0;
-        Object.values(meetingMap).forEach(set => totalGroups += set.size);
-
-        return totalGroups;
-    }
-
-    async function processSelectedServiceBodies(selectionId, regionUrl, serviceBodyName) {
-        const serviceBodyInfo = regionUrl.split("||");
-        let rootServerUrl = serviceBodyInfo[0];
-        let serviceBodySelectedId = serviceBodyInfo[1];
-        document.getElementById('selectedServiceBodyLabel').innerHTML = "You selected: "
-        document.getElementById('selectedServiceBody').innerHTML = selectionId + " [" + serviceBodyName + " (" + serviceBodySelectedId + ")]"
-        let meetingsData = await fetchJsonp(rootServerUrl + 'client_interface/jsonp/?switcher=GetSearchResults&services=' + serviceBodySelectedId + '&recursive=1&data_field_key=formats,meeting_name,service_body_bigint').then(function (response) {
-            return response.json();
-        })
-        tally(meetingsData)
+        return Object.values(map).reduce((acc, s) => acc + s.size, 0);
     }
 
     function tally(data) {
-        let totalMeetings, inPerson, virtual, hybrid, tempVirtual, tempClosed;
-        totalMeetings = inPerson = virtual = hybrid = tempVirtual = tempClosed = 0;
-        let totalGroups = calculateTotalGroups(data)
-        for (const meeting of data) {
-            let formats = meeting.formats.split(",");
-            if (
-                !formats.includes("VM") &&
-                !formats.includes("TC") &&
-                !formats.includes("HY")
-            ) {
-                inPerson++;
-            } else if (
-                formats.includes("VM") &&
-                !formats.includes("TC") &&
-                !formats.includes("HY")
-            ) {
-                virtual++;
-            } else if (
-                formats.includes("VM") &&
-                formats.includes("TC") &&
-                !formats.includes("HY")
-            ) {
-                virtual++;
-                tempVirtual++;
-            } else if (
-                !formats.includes("VM") &&
-                !formats.includes("TC") &&
-                formats.includes("HY")
-            ) {
-                hybrid++;
-            } else if (
-                formats.includes("VM") &&
-                !formats.includes("TC") &&
-                formats.includes("HY")
-            ) {
-                hybrid++;
-            } else if (
-                !formats.includes("VM") &&
-                formats.includes("TC") &&
-                !formats.includes("HY")
-            ) {
-                tempClosed++;
-            }
-            totalMeetings++;
+        let total = 0, inPerson = 0, virtual = 0, hybrid = 0;
+
+        for (const mtg of data) {
+            const f = mtg.formats.split(',');
+            const vm = f.includes('VM'), tc = f.includes('TC'), hy = f.includes('HY');
+
+            if (!vm && !tc && !hy)       inPerson++;
+            else if (vm && !hy)          virtual++;
+            else if (hy)                 hybrid++;
+
+            total++;
         }
 
-        let totals = {
-            inPerson: inPerson,
-            virtual: virtual,
-            tempVirtual: tempVirtual,
-            hybrid: hybrid,
-            tempClosed: tempClosed,
-            totalMeetings: totalMeetings,
-            totalGroups: totalGroups
-        };
-        document.getElementById("tallyDiv").style.display = "block";
-        document.getElementById('inPerson').innerHTML = totals.inPerson
-        document.getElementById('hybrid').innerHTML = totals.hybrid
-        document.getElementById('virtual').innerHTML = totals.virtual
-        document.getElementById('totalMeetings').innerHTML = totals.totalMeetings
-        document.getElementById('totalGroups').innerHTML = totals.totalGroups
+        document.getElementById('inPerson').textContent    = inPerson;
+        document.getElementById('hybrid').textContent      = hybrid;
+        document.getElementById('virtual').textContent     = virtual;
+        document.getElementById('totalMeetings').textContent = total;
+        document.getElementById('totalGroups').textContent = calculateTotalGroups(data);
+
+        const res = document.getElementById('results');
+        res.classList.add('visible');
+        res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 </script>
+
 </body>
 </html>
