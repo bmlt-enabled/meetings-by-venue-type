@@ -2,8 +2,41 @@
 $service_body_selected_id = "1033";
 $meetings = json_decode(get( "https://texasoklahomana.org/main_server/client_interface/json/?switcher=GetSearchResults&services=$service_body_selected_id&recursive=1&data_field_key=formats,meeting_name,service_body_bigint"), true);
 $total_groups = calculateTotalGroups($meetings);
+$group_names = getUniqueGroupNames($meetings);
 
-echo "Total Groups: " . $total_groups . "\n";
+echo "Total Groups: " . $total_groups . "\n\n";
+echo "Group Names (Alphabetical):\n";
+echo str_repeat("-", 40) . "\n";
+foreach ($group_names as $name) {
+    echo $name . "\n";
+}
+
+/**
+ * Get list of unique group names in alphabetical order.
+ *
+ * @param array $meetings Array of meeting data from the API.
+ *
+ * @return array Sorted array of unique group names.
+ */
+function getUniqueGroupNames($meetings)
+{
+    $unique_names = [];
+    foreach ($meetings as $meeting) {
+        // Normalize and store the original meeting name (not lowercase).
+        $meeting_name = trim($meeting["meeting_name"]);
+        $normalized_key = strtolower($meeting_name);
+        // Use normalized key to deduplicate, but store original name.
+        if (!isset($unique_names[$normalized_key])) {
+            $unique_names[$normalized_key] = $meeting_name;
+        }
+    }
+
+    // Get the values (original names) and sort alphabetically.
+    $names = array_values($unique_names);
+    sort($names, SORT_STRING | SORT_FLAG_CASE);
+
+    return $names;
+}
 
 /**
  * Calculate total number of unique groups.
