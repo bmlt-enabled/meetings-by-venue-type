@@ -98,6 +98,8 @@
 
         .step.active  { border-color: var(--amber); }
         .step.done    { border-color: var(--border); opacity: 0.65; }
+        .step.done:hover { opacity: 0.9; border-color: var(--border-hi); }
+        .step.done .step-head { cursor: pointer; }
         .step.hidden  { display: none; }
 
         .step-head {
@@ -146,6 +148,17 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        .step-edit {
+            font-size: 9px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            display: none;
+        }
+
+        .step.done .step-edit { display: block; }
 
         .step-body {
             padding: 0 18px 18px 58px;
@@ -357,10 +370,11 @@
 
     <!-- Step 1 -->
     <div class="step active" id="step1">
-        <div class="step-head">
+        <div class="step-head" onclick="resetTo(1)">
             <div class="step-num">01</div>
             <div class="step-label">Root Server</div>
             <div class="step-chosen" id="chosen1"></div>
+            <div class="step-edit">change</div>
         </div>
         <div class="step-body">
             <div class="loading" id="root-loading">
@@ -375,10 +389,11 @@
 
     <!-- Step 2 -->
     <div class="step hidden" id="step2">
-        <div class="step-head">
+        <div class="step-head" onclick="resetTo(2)">
             <div class="step-num">02</div>
             <div class="step-label">Region</div>
             <div class="step-chosen" id="chosen2"></div>
+            <div class="step-edit">change</div>
         </div>
         <div class="step-body">
             <div class="sel-wrap">
@@ -389,10 +404,11 @@
 
     <!-- Step 3 -->
     <div class="step hidden" id="step3">
-        <div class="step-head">
+        <div class="step-head" onclick="resetTo(3)">
             <div class="step-num">03</div>
             <div class="step-label">Service Body</div>
             <div class="step-chosen" id="chosen3"></div>
+            <div class="step-edit">change</div>
         </div>
         <div class="step-body">
             <div class="sel-wrap">
@@ -485,6 +501,29 @@
                 window[cb] = () => { delete window[cb]; };
             }, 300000);
         });
+    }
+
+    /* ── Reset ── */
+    function resetTo(stepNum) {
+        // Only act if the step is in done state
+        const el = document.getElementById('step' + stepNum);
+        if (!el.classList.contains('done')) return;
+
+        // Re-activate the clicked step
+        el.classList.remove('done');
+        el.classList.add('active');
+        document.getElementById('chosen' + stepNum).textContent = '';
+
+        // Hide + reset all later steps
+        for (let n = stepNum + 1; n <= 3; n++) {
+            const s = document.getElementById('step' + n);
+            s.className = 'step hidden';
+            document.getElementById('chosen' + n).textContent = '';
+            s.querySelector('select').length = 0;
+        }
+
+        // Hide results
+        document.getElementById('results').classList.remove('visible');
     }
 
     /* ── Step helpers ── */
